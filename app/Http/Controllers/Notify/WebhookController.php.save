@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers\Notify;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\RawArticle;
+use Illuminate\Support\Str;
+use App\Handler\WebhookHandler;
+use Spatie\WebhookServer\WebhookCall;
+
+class WebhookController extends Controller
+{
+    public function sendArticle(Request $request){
+        $articles = RawArticle::with('category', 'tags', 'website')->where('update_status', '=', '1')->where('sent_status', '=', '0')->get();
+        $uuid = array();
+        $data = [];
+
+        foreach($articles as $uuid_data){
+            $data = $uuid_data['uuid'];
+    
+            array_push($uuid,$data);
+        }
+
+        $url = 'https://devcms.mpt.com.mm/api/news/new_articles';
+                //https://devcms.mpt.com.mm/api/news/new_articles
+                
+        $data = [
+            'new' => [],
+            'update' => [
+                "94483c5e-e375-4abf-a616-8d264ad3e819"
+            ]
+        ];
+
+    	$json_array = json_encode($data);
+        $curl = curl_init();
+        $headers = [
+            'Accept: application/json',
+            'Content-Type: application/json',
+        ];
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $json_array);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        curl_close($curl);
+
+        if ($http_code >= 200 && $http_code < 300) {
+            echo "webhook Success";
+        } else {
+            echo "webhook failed.";
+        }
+
+    }
+
+}

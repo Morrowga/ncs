@@ -1,0 +1,1177 @@
+<?php
+
+namespace App\Http\Controllers\Web_Scraping;
+
+use App\Helpers\Helper;
+use App\Http\Controllers\Controller;
+use App\Models\Settings\Category;
+use App\Models\Scrapes\ItemSchema;
+use App\Lib\Scraper;
+use App\Models\Scrapes\Link;
+use App\Models\Scrapes\Website;
+use Illuminate\Http\Request;
+use Goutte\Client;
+use App\Models\Scrapes\Content;
+use Auth;
+use Carbon\Carbon;
+use App\Models\Articles\RawArticle;
+use DOMDocument;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+class LinksController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $search_website = request()->input('search_website');
+
+        if ($search_website) {
+            $search_website_query = ['website_id', $search_website];
+        } else {
+            $search_website_query = ['website_id', '!=', NULL];
+        }
+        $links = Link::with('category', 'website')
+            ->where([
+                $search_website_query,
+            ])->orderBy('id', 'DESC')->paginate(10);
+
+        $itemSchemas = ItemSchema::all();
+
+        $default = [
+            'links' => $links,
+
+            'search_website' => $search_website,
+        ];
+
+        return view('web_scraping.links.index', $default)->withItemSchemas($itemSchemas);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $categories = Category::all();
+        $websites = Website::all();
+
+        return view('web_scraping.links.create')->withCategories($categories)->withWebsites($websites);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'url' => 'required',
+            'main_filter_selector' => 'required',
+            'website_id' => 'required',
+            'category_id' => 'required'
+        ]);
+
+        $link = new Link;
+
+        $link->url = $request->input('url');
+
+        $link->main_filter_selector = $request->input('main_filter_selector');
+
+        $link->website_id = $request->input('website_id');
+
+        $link->category_id = $request->input('category_id');
+
+        $link->save();
+
+        return redirect()->route('links.index');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $categories = Category::all();
+        $websites = Website::all();
+
+        return view('web_scraping.links.edit')->withLink(Link::find($id))->withCategories($categories)->withWebsites($websites);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $this->validate($request, [
+            'url' => 'required',
+            'main_filter_selector' => 'required',
+            'website_id' => 'required',
+            'category_id' => 'required'
+        ]);
+
+        $link = Link::find($id);
+
+        $link->url = $request->input('url');
+
+        $link->main_filter_selector = $request->input('main_filter_selector');
+
+        $link->website_id = $request->input('website_id');
+
+        $link->category_id = $request->input('category_id');
+
+        $link->save();
+
+        return redirect()->route('links.index');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $link = Link::findOrFail($id);
+        $link->delete();
+        return redirect()->route('links.index', $link->id);
+    }
+
+
+    /**
+     * @param Request $request
+     */
+    public function setItemSchema(Request $request)
+    {
+        if ($request->schema_id && $request->link_id) {
+            $link = Link::find($request->link_id);
+            $link->item_schema_id = $request->schema_id;
+            $link->save();
+
+            return response()->json(['status' => true]);
+        }
+        return response()->json(['status' => false]);
+    }
+
+
+    /**
+     * scrape specific link
+     *
+     * @param Request $request
+     */
+    public function scrape(Request $request)
+    {
+        if (!$request->link_id)
+            return;
+
+        $link = Link::find($request->link_id);
+
+        if (empty($link->main_filter_selector) && (empty($link->item_schema_id) || $link->item_schema_id == 0)) {
+            return;
+        }
+
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        if ($scraper->status == 1) {
+            return response()->json(['status' => 1, 'msg' => 'Scraping done']);
+        } else {
+            return response()->json(['status' => 2, 'msg' => $scraper->status]);
+        }
+    }
+
+    public function getCont()
+    {
+        $ch = curl_init();
+        $url = 'https://lifestylemyanmar.com/category/lotaya/?feed=Lifestyle_Myanmar_RSS_Feed_for_Lotaya';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $e = json_encode($data);
+        $d = json_decode($e, true);
+        $d = str_replace(array("\n", "\r", "\t"), '', $d);
+
+        $rss = new DOMDocument();
+        $rss->loadXML($d);
+        $feed = array();
+        foreach ($rss->getElementsByTagName('item') as $node) {
+
+            $item = array(
+                'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+                'guid' => $node->getElementsByTagName('guid')->item(0)->nodeValue,
+                'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
+                'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
+                'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
+                'website_id' => '1',
+                'category_id' => '1'
+            );
+            array_push($feed, $item);
+        }
+
+        foreach ($feed as $f) {
+            $checkExist = RawArticle::where('source_link', $f['guid'])->first();
+            if (!isset($checkExist->id)) {
+                $raw = new RawArticle();
+                $raw->title = tounicode($f['title']);
+                $raw->source_link = $f['guid'];
+                $raw->published_date = date('Y-m-d H:i:s', strtotime($f['pubDate']));
+                $raw->content = tounicode($f['content']);
+                $raw->image = $f['image'];
+                $raw->website_id = $f['website_id'];
+                $raw->category_id = $f['category_id'];
+                $raw->save();
+
+                $current_id = $raw->id;
+
+                foreach (explode('</', str_replace(array('<p>'), '</', tounicode($raw->content))) as $f_content) {
+                    if (stripos($f_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($f_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $img;
+                            $content->save();
+                        }
+                    } else {
+                        $convert = html_entity_decode($f_content);
+                        $convert = str_replace('*', '', $convert);
+                        $convert = str_replace('<', '', $convert);
+                        $convert = str_replace('<br>', '', $convert);
+                        $convert = str_replace('figure>', '', $convert);
+                        $convert = str_replace('p>', '', $convert);
+                        foreach (explode('h1>', $convert) as $con) {
+                            foreach (explode('strong>', $con) as $con_strong) {
+                                foreach (explode('em>', $con_strong) as $con_em) {
+                                    foreach (explode('ul>', $con_em) as $con_ul) {
+                                        foreach (explode('li>', $con_ul) as $con_li) {
+                                            $content = new Content();
+                                            $content->article_id = $current_id;
+                                            $content->content_text = tounicode($con_li);
+                                            $content->save();
+
+                                            $del = Content::where('content_text', "")->delete();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    public function getConMS()
+    {
+        $ch = curl_init();
+        $url = 'https://mystylemyanmar.com/feed/';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $e = json_encode($data);
+        $d = json_decode($e, true);
+
+        $rss = new DOMDocument();
+        $rss->loadXML($d);
+        $feed = array();
+        foreach ($rss->getElementsByTagName('item') as $node) {
+
+            $item = array(
+                'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+                'guid' => $node->getElementsByTagName('guid')->item(0)->nodeValue,
+                'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
+                'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
+                'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
+                'website_id' => '1',
+                'category_id' => '1'
+            );
+            array_push($feed, $item);
+        }
+        foreach ($feed as $f) {
+            $checkExist = RawArticle::where('source_link', $f['guid'])->first();
+            if (!isset($checkExist->id)) {
+                $raw = new RawArticle();
+                $raw->title = tounicode($f['title']);
+                $raw->source_link = $f['guid'];
+                $raw->published_date = date('Y-m-d H:i:s', strtotime($f['pubDate']));
+                $raw->content = $f['content'];
+                $raw->image = $f['image'];
+                $raw->website_id = $f['website_id'];
+                $raw->category_id = $f['category_id'];
+                $raw->save();
+
+                $current_id = $raw->id;
+
+
+                foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
+                    if (stripos($f_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($f_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $img;
+                            $content->save();
+                        }
+                    } else {
+                        $f_content = str_replace('/>', '', $f_content);
+                        $f_content = str_replace('<', '', $f_content);
+                        $f_content = str_replace('a>', '', $f_content);
+                        $f_content = str_replace('p>', '', $f_content);
+                        $f_content = str_replace('iframe>', '', $f_content);
+                        $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
+                        $convert = html_entity_decode($f_content);
+                        foreach (explode('strong>', $convert) as $con) {
+                            foreach (explode('ul>', $con) as $con_ul) {
+                                foreach (explode('li>', $con_ul) as $con_li) {
+                                    foreach (explode('br', $con_li) as $br) {
+                                        $con_li = str_replace('<p><', '', $br);
+                                        $content = new Content();
+                                        $content->article_id = $current_id;
+                                        $content->content_text = $br;
+                                        $content->save();
+                                        $del = Content::where('content_text', "")->delete();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function healthCare()
+    {
+        $date_format = date("Y-m-d");
+        $ch = curl_init();
+        $url = 'https://healthcare.com.mm/tompt/' . $date_format;
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        foreach ($json_d['items'] as $d) {
+            $checkExist = RawArticle::where('source_link', $d['posturl'])->first();
+            if (!isset($checkExist->id)) {
+                $d['content'] = str_replace(array("\n", "\r", "\t"), '', $d['content']);
+                $convert = html_entity_decode($d['content']);
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($d['title']);
+                $store_data->content = $convert;
+                $store_data->category_id = '8';
+                $store_data->website_id = '4';
+                $store_data->published_date = date('Y-m-d H:i:s', strtotime($d['date']));
+                $store_data->image = $d['image'];
+                $store_data->source_link = $d['posturl'];
+                $store_data->save();
+            }
+        }
+    }
+
+    public function ondoctor()
+    {
+        $link = Link::find(3);
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        $articles = RawArticle::where('website_id', '1')->get();
+        foreach ($articles as $article) {
+            $check_exist = Content::where('article_id', $article->id)->get();
+            if ($check_exist->count() < 1) {
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+                foreach (explode('</', $article->content) as $on_content) {
+                    if (stripos($on_content, 'src')) {
+                        $on_content = str_replace('<p>', '', $on_content);
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($on_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                        }
+                        $content = new Content();
+                        $content->article_id = $article->id;
+                        $content->content_image = $img;
+                        $content->save();
+                    } else {
+                        $on_content = str_replace('p>', '', $on_content);
+                        foreach (explode('strong>', $on_content) as $con) {
+                            foreach (explode('ul>', $con) as $con_ul) {
+                                foreach (explode('li>', $con_ul) as $con_li) {
+                                    $con_li = str_replace('<br>', '', $con_li);
+                                    $con_li = str_replace('<<', '', $con_li);
+                                    $con_li = str_replace('<', '', $con_li);
+                                    $con_li = str_replace('a>', '', $con_li);
+                                    $con_li = str_replace('h4>', '', $con_li);
+                                    $content = new Content();
+                                    $content->article_id = $article->id;
+                                    $content->content_text = $con_li;
+                                    $content->save();
+
+                                    $del = Content::where('content_text', "")->delete();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    public function ict()
+    {
+        $ch = curl_init();
+        $url = 'http://api.ictdirectory.com.mm/4/1/all';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+        foreach ($json_d as $ict_data) {
+            $true_url = "https://" . $ict_data['link'];
+            $checkExist = RawArticle::where('source_link', $true_url)->first();
+            if (!isset($checkExist->id)) {
+                $detail_count = str_word_count($ict_data['detail']);
+                $introtext_count = str_word_count($ict_data['introtext']);
+
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($ict_data['title']);
+                if ($detail_count > $introtext_count) {
+                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $ict_data['detail']);
+                    $convert = html_entity_decode($ict_data['detail']);
+                    $store_data->content = $convert;
+                } else {
+                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $ict_data['introtext']);
+                    $convert = html_entity_decode($ict_data['introtext']);
+                    $store_data->content = $convert;
+                }
+                $store_data->website_id = '1';
+                $store_data->category_id = '1';
+                $store_data->published_date =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
+                $store_data->image = "https://" . $ict_data['images']['lg'];
+                $store_data->source_link = $true_url;
+                $store_data->save();
+
+                $content = new Content;
+                $content->article_id = $store_data->id;
+                $content->content_image = $store_data->image;
+                $content->save();
+
+                if ($detail_count > $introtext_count) {
+                    $intro = $ict_data['introtext'];
+                    $intro = strip_tags($intro);
+                    $content_intro = Content::create([
+                        "article_id" => $store_data->id,
+                        "content_text" => $intro
+                    ]);
+                }
+
+                $current_id = $store_data->id;
+
+                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                foreach (explode('</', $store_data->content) as $ict_con) {
+                    if (stripos($ict_con, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($ict_con);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($ict_con, 'src') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($ict_con);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $image = "https://www.myanmaritdirectory.com/" . $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $image;
+                            $content->save();
+                        }
+                    } else {
+                        foreach (explode('span>', $ict_con) as $con) {
+                            $con = strip_tags(str_replace("&nbsp;", " ", $con), '<br>');
+                            $con = str_replace('colgrou', '', $con);
+                            $con = str_replace('a>', '', $con);
+                            $con = str_replace('tr>', '', $con);
+                            $con = str_replace('td>', '', $con);
+                            $con = str_replace('div>', '', $con);
+                            $con = str_replace('tbody>', '', $con);
+                            $con = str_replace('table>', '', $con);
+                            $con = str_replace('p>', '', $con);
+                            $con = str_replace('strong>', '', $con);
+                            $con = str_replace('iframe>', '', $con);
+                            foreach (explode('<br />', $con) as $con_br) {
+                                $content = new Content;
+                                $content->article_id = $current_id;
+                                $content->content_text = $con_br;
+                                $content->save();
+                                $del = Content::where('content_text', "")->delete();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function sayar()
+    {
+        $ch = curl_init();
+        $url = 'http://api.sayar.com.mm/4/1/all';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+
+        foreach ($json_d as $sayar_data) {
+            $sayar_link = "https://" . $sayar_data['link'];
+            $checkExist = RawArticle::where('source_link', $sayar_link)->first();
+            if (!isset($checkExist->id)) {
+                $detail_count = str_word_count($sayar_data['detail']);
+                $introtext_count = str_word_count($sayar_data['introtext']);
+
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($sayar_data['title']);
+                if ($detail_count > $introtext_count) {
+                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['detail']);
+                    $convert = html_entity_decode($sayar_data['detail']);
+                    $store_data->content = tounicode($convert);
+                } else {
+                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['introtext']);
+                    $convert = html_entity_decode($sayar_data['introtext']);
+                    $store_data->content = tounicode($convert);
+                }
+                $store_data->website_id = '1';
+                $store_data->category_id = '1';
+                $store_data->published_date =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
+                $store_data->image = "https://" . $sayar_data['images']['lg'];
+                $store_data->source_link = $sayar_link;
+                $store_data->save();
+
+                $content = new Content;
+                $content->article_id = $store_data->id;
+                $content->content_image = $store_data->image;
+                $content->save();
+
+                if ($detail_count > $introtext_count) {
+                    $intro = $ict_data['introtext'];
+                    $intro = strip_tags($intro);
+                    $content_intro = Content::create([
+                        "article_id" => $store_data->id,
+                        "content_text" => tounicode($intro)
+                    ]);
+                }
+
+                $current_id = $store_data->id;
+
+                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                foreach (explode('</', $store_data->content) as $sayar_con) {
+                    if (stripos($sayar_con, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($sayar_con);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($sayar_con, 'src') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($sayar_con);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $image = "https://www.sayar.com.mm/" . $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $image;
+                            $content->save();
+                        }
+                    } else {
+                        foreach (explode('span>', $sayar_con) as $con) {
+                            $con = str_replace(array("\n", "\r", "\t"), '', $con);
+                            $con = strip_tags(str_replace("&nbsp;", " ", $con));
+                            $con = str_replace('p>', '', $con);
+                            $con = str_replace('strong>', '', $con);
+                            $con = str_replace('<br />', '', $con);
+                            $content = new Content;
+                            $content->article_id = $current_id;
+                            $content->content_text = tounicode($con);
+                            $content->save();
+
+                            $del = Content::where('content_text', "")->delete();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function yoyar_ent()
+    {
+        $link = Link::find(5);
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        $articles = RawArticle::where('website_id', '38')->get();
+        foreach ($articles as $article) {
+            $check_exist = Content::where('article_id', $article->id)->get();
+            if ($check_exist->count() < 1) {
+                $content_feature = new Content;
+                $file_format = file_get_contents($article->image);
+                $filename = substr($article->image, strrpos($article->image, '/') + 1);
+                $filename = str_replace('.jpg', '.webp', $filename);
+                $locate = Storage::disk('public')->put($filename, $file_format);
+                $content_feature->article_id = $article->id;
+                $content_feature->content_image = $filename;
+                $content_feature->save();
+
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+                foreach (explode('</', $article->content) as $yyl_content) {
+                    if (stripos($yyl_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($yyl_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $contents = file_get_contents($img);
+                            $name = substr($img, strrpos($img, '/') + 1);
+                            $name = str_replace('.jpg', '.webp', $name);
+                            $locate = Storage::disk('public')->put($name, $contents);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_image = $name;
+                            $content->save();
+                        }
+                    } else {
+                        $yyl_content = str_replace("class='post-views-count'>", '', $yyl_content);
+                        $yyl_content = str_replace('p>', '', $yyl_content);
+                        $yyl_content = str_replace('figure>', '', $yyl_content);
+                        $yyl_content = str_replace('<', '', $yyl_content);
+                        $convert = html_entity_decode($yyl_content);
+                        foreach (explode('</strong>', $convert) as $con) {
+                            $con = str_replace('<strong>', '', $con);
+                            foreach (explode('>', $con) as $con_h2) {
+                                $con_h2 = str_replace('h2', '', $con_h2);
+                                $con_h2 = preg_replace('/\sid=[\'|"][^\'"]+[\'|"]/', '', $con_h2);
+                                $content = new Content();
+                                $content->article_id = $article->id;
+                                $content->content_text = $con_h2;
+                                $content->save();
+
+                                $del = Content::where('content_text', "")->delete();
+
+                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label'];
+                                $result = DB::table('contents')
+                                    ->where(function ($query) use ($array) {
+                                        foreach ($array as $key) {
+                                            $query->orWhere('content_text', 'LIKE', "%$key%");
+                                        }
+                                    })
+                                    ->delete();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function yoyar_health()
+    {
+        $link = Link::find(4);
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        $articles = RawArticle::where('website_id', '37')->get();
+        foreach ($articles as $article) {
+            $check_exist = Content::where('article_id', $article->id)->get();
+            if ($check_exist->count() < 1) {
+                $content_feature = new Content;
+                $content_feature->content_image = $article->image;
+                $content_feature->save();
+
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+                foreach (explode('</', $article->content) as $yyl_content) {
+                    if (stripos($yyl_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($yyl_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $contents = file_get_contents($img);
+                            $name = substr($img, strrpos($img, '/') + 1);
+                            $name = str_replace('.jpg', '.png', $name);
+                            $locate = Storage::disk('public')->put($name, $contents);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_image = $name;
+                            $content->save();
+                        }
+                    } else {
+                        $yyl_content = str_replace("class='post-views-count'>", '', $yyl_content);
+                        $yyl_content = str_replace('p>', '', $yyl_content);
+                        $yyl_content = str_replace('figure>', '', $yyl_content);
+                        $yyl_content = str_replace('<', '', $yyl_content);
+                        $convert = html_entity_decode($yyl_content);
+                        foreach (explode('</strong>', $convert) as $con) {
+                            $con = str_replace('<strong>', '', $con);
+                            foreach (explode('>', $con) as $con_h2) {
+                                $con_h2 = str_replace('h2', '', $con_h2);
+                                $con_h2 = preg_replace('/\sid=[\'|"][^\'"]+[\'|"]/', '', $con_h2);
+                                $content = new Content();
+                                $content->article_id = $article->id;
+                                $content->content_text = $con_h2;
+                                $content->save();
+
+                                $del = Content::where('content_text', "")->delete();
+
+                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label'];
+                                $result = DB::table('contents')
+                                    ->where(function ($query) use ($array) {
+                                        foreach ($array as $key) {
+                                            $query->orWhere('content_text', 'LIKE', "%$key%");
+                                        }
+                                    })
+                                    ->delete();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function edge()
+    {
+        $ch = curl_init();
+        $url = 'http://api.edge.com.mm/4/1/all';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+        foreach ($json_d as $edge_data) {
+            $checkExist = RawArticle::where('source_link', $edge_data['link'])->first();
+            if (!isset($checkExist->id)) {
+                $detail_count = str_word_count($edge_data['detail']);
+                $introtext_count = str_word_count($edge_data['introtext']);
+
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($edge_data['title']);
+                if ($detail_count > $introtext_count) {
+                    $edge_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['detail']);
+                    $convert = html_entity_decode($edge_data['detail']);
+                    $store_data->content = $convert;
+                } else {
+                    $edge_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['introtext']);
+                    $convert = html_entity_decode($edge_data['introtext']);
+                    $store_data->content = $convert;
+                }
+                $store_data->website_id = '1';
+                $store_data->category_id = '1';
+                $store_data->published_date =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
+                $store_data->image = $edge_data['images'];
+                $store_data->source_link = $edge_data['link'];
+                $store_data->save();
+
+                $content = new Content;
+                $content->article_id = $store_data->id;
+                $content->content_image = $store_data->image;
+                $content->save();
+
+                if ($detail_count > $introtext_count) {
+                    $intro = $edge_data['introtext'];
+                    $intro = strip_tags($intro);
+                    $content_intro = Content::create([
+                        "article_id" => $store_data->id,
+                        "content_text" => $intro
+                    ]);
+                }
+
+                $current_id = $store_data->id;
+
+                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                foreach (explode('</', $store_data->content) as $edge_con) {
+                    if (stripos($edge_con, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($edge_con);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($edge_con, 'src') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($edge_con);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $image = "https://www.edge.com.mm/" . $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $image;
+                            $content->save();
+                        }
+                    } else {
+                        foreach (explode('>', $edge_con) as $con) {
+                            $con = strip_tags(str_replace("&nbsp;", " ", $con));
+                            $con = str_replace('a', '', $con);
+                            $con = str_replace('p', '', $con);
+                            $con = str_replace('strong', '', $con);
+                            $con = str_replace('span', '', $con);
+                            $con = str_replace('<br />', '', $con);
+                            $content = new Content;
+                            $content->article_id = $current_id;
+                            $content->content_text = $con;
+                            $content->save();
+                            $del = Content::where('content_text', "")->delete();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public function wedding_guide()
+    {
+        $ch = curl_init();
+        $url = 'http://api.weddingguide.com.mm/relationships/7/0/all';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+        foreach ($json_d as $wedding_data) {
+            $checkExist = RawArticle::where('source_link', $wedding_data['link'])->first();
+            if (!isset($checkExist->id)) {
+                $detail_count = str_word_count($wedding_data['detail']);
+                $introtext_count = str_word_count($wedding_data['introtext']);
+
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($wedding_data['title']);
+                if ($detail_count > $introtext_count) {
+                    $wedding_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $wedding_data['detail']);
+                    $convert = html_entity_decode($wedding_data['detail']);
+                    $store_data->content = $convert;
+                } else {
+                    $wedding_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $wedding_data['introtext']);
+                    $convert = html_entity_decode($wedding_data['introtext']);
+                    $store_data->content = $convert;
+                }
+                $store_data->website_id = '1';
+                $store_data->category_id = '1';
+                $store_data->published_date =  date('Y-m-d H:i:s', strtotime($wedding_data['created']));
+                if (!empty($wedding_data['images'])) {
+                    if (sizeof($wedding_data['images']) >= 2) {
+                        if (stripos($wedding_data['images']['xs'], 'https://') !== false) {
+                            $store_data->image_thumbnail = $wedding_data['images']['xs'];
+                        } else {
+                            $store_data->image_thumbnail = 'https://' . $wedding_data['images']['xs'];
+                        }
+                        if (stripos($wedding_data['images']['lg'], 'https://') !== false) {
+                            $store_data->image_thumbnail = $wedding_data['images']['lg'];
+                        } else {
+                            $store_data->image_thumbnail = 'https://' . $wedding_data['images']['lg'];
+                        }
+                    } else {
+                        $store_data->image = $wedding_data['images'];
+                    }
+                }
+
+                $store_data->source_link = $wedding_data['link'];
+                // dd($store_data);
+                $store_data->save();
+
+                $content = new Content;
+                $content->article_id = $store_data->id;
+                if (!empty($store_data->image_thumbnail)) {
+                    $content->content_image = $store_data->image_thumbnail;
+                } else {
+                    $content->content_image = $store_data->image;
+                }
+                $content->save();
+
+                if ($detail_count > $introtext_count) {
+                    $intro = $wedding_data['introtext'];
+                    $intro = strip_tags($intro);
+                    $content_intro = Content::create([
+                        "article_id" => $store_data->id,
+                        "content_text" => $intro
+                    ]);
+                }
+
+                $current_id = $store_data->id;
+
+                // $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                foreach (explode('</', $store_data->content) as $wedding_con) {
+                    if (stripos($wedding_con, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($wedding_con);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($wedding_con, 'src') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($wedding_con);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $image = "https://www.weddingguide.com/" . $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $image;
+                            $content->save();
+                        }
+                    } else {
+                        foreach (explode('>', $wedding_con) as $con) {
+                            $con = strip_tags(str_replace("&nbsp;", " ", $con));
+                            $con = str_replace('a', '', $con);
+                            $con = str_replace('p', '', $con);
+                            $con = str_replace('sn', '', $con);
+                            $con = str_replace('strong', '', $con);
+                            $con = str_replace('span', '', $con);
+                            $con = str_replace('<br />', '', $con);
+                            $content = new Content;
+                            $content->article_id = $current_id;
+                            $content->content_text = $con;
+                            $content->save();
+                            $del = Content::where('content_text', "")->delete();
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //yathar
+    public function yathar()
+    {
+        $ch = curl_init();
+        $url = 'https://magazine.yathar.com/my/feed/';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $e = json_encode($data);
+        $d = json_decode($e, true);
+        $d = str_replace('&', '&amp;', $d);
+        $rss = new DOMDocument();
+        $rss->loadXML($d);
+
+        $feed = array();
+
+        foreach ($rss->getElementsByTagName('item') as $node) {
+            // dd($node);
+            // echo $node->getElementsByTagName('title')->item(0)->nodeValue;
+            $item = array(
+                'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+                'guid' => $node->getElementsByTagName('guid')->item(0)->nodeValue,
+                'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
+                'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
+                'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
+                'website_id' => '1',
+                'category_id' => '1'
+            );
+
+            array_push($feed, $item);
+        }
+        foreach ($feed as $f) {
+            $checkExist = RawArticle::where('source_link', $f['guid'])->first();
+            if (!isset($checkExist->id)) {
+                $raw = new RawArticle();
+                $raw->title = tounicode($f['title']);
+                $raw->source_link = $f['guid'];
+                $raw->published_date = date('Y-m-d H:i:s', strtotime($f['pubDate']));
+                $raw->content = tounicode($f['content']);
+                $raw->image = $f['image'];
+                $raw->website_id = $f['website_id'];
+                $raw->category_id = $f['category_id'];
+                // dd($raw);
+                $raw->save();
+
+                $current_id = $raw->id;
+
+
+                foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
+                    if (stripos($f_content, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($f_content);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($f_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($f_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_image = $img;
+                            $content->save();
+                        }
+                    } else {
+                        $search_array = array(
+                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong'
+                        );
+                        $f_con = str_replace($search_array, '', $f_content);
+                        $f_content = trim(html_entity_decode($f_con), " \t\n\r\0\x0B\xC2\xA0");
+
+                        // $f_content = str_replace('>', '', $f_content);
+                        $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
+                        $convert = html_entity_decode($f_content);
+                        foreach (explode('strong>', $convert) as $con) {
+                            foreach (explode('ul>', $con) as $con_ul) {
+                                foreach (explode('li>', $con_ul) as $con_li) {
+                                    foreach (explode('br>', $con_li) as $br) {
+                                        $con_li = str_replace('<p><', '', $br);
+                                        $content = new Content();
+                                        $content->article_id = $current_id;
+                                        $content->content_text = $br;
+                                        $content->save();
+                                        $del = Content::where('content_text', "")->delete();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

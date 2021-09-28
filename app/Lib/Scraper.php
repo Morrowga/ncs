@@ -1,0 +1,269 @@
+<?php
+
+namespace App\Lib;
+
+use App\Models\Articles\RawArticle;
+use Goutte\Client as GoutteClient;
+use App\Models\Scrapes\Website;
+use App\Models\Scrapes\Category;
+use Carbon\Carbon;
+use App\Models\Scrapes\Content;
+use DOMDocument;
+use App\Helpers\Helper;
+use Illuminate\Support\Str;
+
+/**
+ * Class Scraper
+ *
+ * handles and process scraping using specific link
+ * first we work on the main filter expression which is the
+ * the container of the items, then using annonymous callback
+ * on the filter function we iterate and save the results
+ * into the article table
+ *
+ * @package App\Lib
+ */
+class Scraper
+{
+    protected $client;
+
+    public $results = [];
+
+    public $savedItems = 0;
+
+    public $status = 1;
+
+    public function __construct(GoutteClient $client)
+    {
+        $this->client = $client;
+    }
+
+    public function handle($linkObj)
+    {
+        try {
+            $crawler = $this->client->request('GET', $linkObj->url);
+
+            $translateExpre = $this->translateCSSExpression($linkObj->itemSchema->css_expression);
+
+            if (isset($translateExpre['title'])) {
+
+                $data = [];
+
+                // filter
+                $crawler->filter($linkObj->main_filter_selector)->each(function ($node) use ($translateExpre, &$data, $linkObj) {
+
+                    // using the $node var we can access sub elements deep the tree
+
+                    foreach ($translateExpre as $key => $val) {
+
+                        if ($node->filter($val['selector'])->count() > 0) {
+
+                            if ($val['is_attribute'] == false) {
+
+                                $data[$key][] = preg_replace("#\n|'|\"#", '', $node->filter($val['selector'])->text());
+                            } else {
+                                if ($key == 'source_link') {
+
+                                    $item_link = $node->filter($val['selector'])->attr($val['attr']);
+
+                                    // append website url in case the article is not full url
+                                    if ($linkObj->itemSchema->is_full_url == 0) {
+                                        $item_link = $linkObj->website->url . $node->filter($val['selector'])->attr($val['attr']);
+                                    }
+
+                                    $data[$key][] = $item_link;
+                                    $data['content'][] = $this->fetchFullContent($item_link, $linkObj->itemSchema->full_content_selector);
+                                } else {
+                                    $data[$key][] = $node->filter($val['selector'])->attr($val['attr']);
+                                }
+                            }
+                        }
+                    }
+
+                    $data['category_id'][] = $linkObj->category->id;
+
+                    $data['website_id'][] = $linkObj->website->id;
+                });
+                //dd($data);
+                $this->save($data);
+
+                $this->results = $data;
+            }
+        } catch (\Exception $ex) {
+            $this->status = $ex->getMessage();
+        }
+    }
+
+
+    /**
+     * fetchFullContent
+     *
+     * this method pulls the full content of a single item using the
+     * item url and selector
+     *
+     * @param $item_url
+     * @param $selector
+     * @return string
+     */
+    protected function fetchFullContent($item_url, $selector)
+    {
+        try {
+            $crawler = $this->client->request('GET', $item_url);
+
+            return $crawler->filter($selector)->html();
+        } catch (\Exception $ex) {
+            return "";
+        }
+    }
+
+    protected function save($data)
+    {
+        foreach ($data['title'] as $k => $val) {
+
+            $checkExist = RawArticle::where('source_link', $data['source_link'][$k])->with('website', 'category')->first();
+
+            if (!isset($checkExist->id)) {
+
+                $article = new RawArticle();
+
+                $article->uuid = Helper::uuid();
+
+                $article->title = $val;
+
+                $article->content = isset($data['content'][$k]) ? $data['content'][$k] : "";
+
+                $article->image = isset($data['image'][$k]) ? $data['image'][$k] : "";
+
+                $article->source_link = $data['source_link'][$k];
+
+                $article->category_id = $data['category_id'][$k];
+
+                $article->published_date = Carbon::now();
+
+                $article->website_id = $data['website_id'][$k];
+
+                $article->save();
+
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+
+                foreach (explode('</p>', $article->content) as $on_content) {
+                    if (stripos($on_content, 'src')) {
+                        $on_content = str_replace('<p>', '', $on_content);
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($on_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                        }
+                        $content = new Content();
+                        $content->article_id = $article->id;
+                        $content->content_image = $img;
+                        $content->save();
+                    } else {
+                        $on_content = str_replace('<p>', '', $on_content);
+                        foreach (explode('</strong>', $on_content) as $con) {
+                            $con = str_replace('<strong>', '', $con);
+                            foreach (explode('</ul>', $con) as $con_ul) {
+                                $con_ul = str_replace('<ul>', '', $con_ul);
+                                foreach (explode('</li>', $con_ul) as $con_li) {
+                                    $con_li = str_replace('<li>', '', $con_li);
+                                    $con_li = str_replace('<br>', '', $con_li);
+                                    $content = new Content();
+                                    $content->article_id = $article->id;
+                                    $content->content_text = $con_li;
+                                    $content->save();
+
+                                    $del = Content::where('content_text', "")->delete();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $this->savedItems++;
+
+                $noti_url = 'https://fcm.googleapis.com/fcm/send';
+                $noti_data = [
+                    "to" => "/topics/general",
+                    "data" => [
+                        "body" => date('h:i:s A', strtotime($article->publishedDate)) . "Prod",
+                        "title" => $article->website->title,
+                        "image" => $article->image,
+                        "sound" => "https://www.mboxdrive.com/hickory_dickory_dock-notification.mp3",
+                    ]
+                ];
+                $noti_json_array = json_encode($noti_data);
+                $noti_headers = [
+                    'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
+                    'Accept: application/json',
+                    'Content-Type: application/json',
+                ];
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $noti_url);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_HEADER, 1);
+                curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+                $response = curl_exec($curl);
+                $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+                curl_close($curl);
+            }
+        }
+    }
+
+
+    /**
+     * translateCSSExpression
+     *
+     * translate the css expression into corresponding fields and sub selectors
+     *
+     * @param $expression
+     * @return array
+     */
+    protected function translateCSSExpression($expression)
+    {
+        $exprArray = explode("||", $expression);
+
+        // try to match split that expression into pieces
+        $regex = '/(.*?)\[(.*)\]/m';
+
+        $fields = [];
+
+        foreach ($exprArray as $subExpr) {
+
+            preg_match($regex, $subExpr, $matches);
+
+            if (isset($matches[1]) && isset($matches[2])) {
+
+                $is_attribute = false;
+
+                $selector = $matches[2];
+
+                $attr = "";
+
+                // if this condition meets then this is attribute like img[src] or a[href]
+                if (strpos($selector, "[") !== false && strpos($selector, "]") !== false) {
+
+                    $is_attribute = true;
+
+                    preg_match($regex, $matches[2], $matches_attr);
+
+                    $selector = $matches_attr[1];
+
+                    $attr = $matches_attr[2];
+                }
+
+                $fields[$matches[1]] = ['field' => $matches[1], 'is_attribute' => $is_attribute, 'selector' => $selector, 'attr' => $attr];
+            }
+        }
+
+        return $fields;
+    }
+}

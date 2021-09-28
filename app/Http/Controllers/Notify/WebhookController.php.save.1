@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers\Notify;
+
+use App\RawArticle;
+use App\ArticleRecord;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Handler\WebhookHandler;
+use App\Http\Controllers\Controller;
+use Spatie\WebhookServer\WebhookCall;
+
+class WebhookController extends Controller
+{
+    public function sendArticle(Request $request){
+        $articles = RawArticle::with('category', 'tags', 'website')->where('update_status', '=', '1')->where('sent_status', '=', '0')->limit(10)->get();
+        $data_id = [];
+
+        foreach($articles as $uuid_data){
+            $add = $uuid_data['uuid'];    
+            array_push($data_id,$add);
+        }
+
+        $update = $request->input('update_news');
+        $update_im = explode("//", $update);
+
+        // $url = 'https://cms.mpt.com.mm/api/news/new_articles';
+<<<<<<< HEAD
+        $url = 'https://devcms.mpt.com.mm/api/news/new_a
+        $url = 'https://cms.mpt.com.mm/api/news/new_articles';
+        // $test_url = 'https://webhook.site/1c04decb-3397-423f-948f-e1a65b1b1603';
+	    // $dev_url = 'https://devcms.mpt.com.mm/api/news/new_articles';       
+    
+>>>>>>> 8e5f62fd26187dd4935c74d24849fca9219ad11c
+        $data = [
+            'new' => $data_id,
+            'update' => $update_im
+        ];
+
+    	$json_array = json_encode($data);
+        $curl = curl_init();
+        $headers = [
+            'Accept: application/json',
+            'Content-Type: application/json',
+        ];
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $json_array);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        curl_close($curl);
+
+
+        $sent = json_decode($json_array, true);
+        // return $sent['new'];            
+        // dd($sent);
+        // return count($sent['new'][0]);
+        if(!empty($sent['new'])){
+            foreach($sent['new'] as $se){
+                $raw_a = RawArticle::where('uuid', $se)->limit(2)->first();
+                $raw_a->sent_status = 1;
+                $raw_a->save();
+
+                $article_record = new ArticleRecord;
+                $article_record->article_id = $raw_a->id;
+                $article_record->view_count = 0;
+                $article_record->read_count = 0;
+                $article_record->like_count = 0;
+                $article_record->share_count = 0;
+                $article_record->save();
+            }
+        }
+
+        return back();
+    }
+
+}

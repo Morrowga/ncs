@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Scrapes\Link;
+use App\Models\Scrapes\Content;
+use DOMDocument;
+use Carbon\Carbon;
+use Goutte\Client;
+use App\Models\Articles\RawArticle;
+use App\Lib\Scraper;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
+class YoyarlayHealthCron extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'yyl-health:cron';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+        $link = Link::find(4);
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        $articles = RawArticle::where('website_id', '37')->get();
+        foreach ($articles as $article) {
+            $check_exist = Content::where('article_id', $article->id)->get();
+            if ($check_exist->count() < 1) {
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+                foreach (explode('</', $article->content) as $yyl_content) {
+                    if (stripos($yyl_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($yyl_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $contents = file_get_contents($img);
+                            $name = substr($img, strrpos($img, '/') + 1);
+                            $locate = Storage::disk('public')->put($name, $contents);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_image = $name;
+                            $content->save();
+                        }
+                    } else {
+                        $yyl_content = str_replace("class='post-views-count'>", '', $yyl_content);
+                        $yyl_content = str_replace('p>', '', $yyl_content);
+                        $yyl_content = str_replace('figure>', '', $yyl_content);
+                        $yyl_content = str_replace('<', '', $yyl_content);
+                        $convert = html_entity_decode($yyl_content);
+                        foreach (explode('</strong>', $convert) as $con) {
+                            $con = str_replace('<strong>', '', $con);
+                            foreach (explode('>', $con) as $con_h2) {
+                                $con_h2 = str_replace('h2', '', $con_h2);
+                                $con_h2 = preg_replace('/\sid=[\'|"][^\'"]+[\'|"]/', '', $con_h2);
+                                $content = new Content();
+                                $content->article_id = $article->id;
+                                $content->content_text = $con_h2;
+                                $content->save();
+
+                                $del = Content::where('content_text', "")->delete();
+
+                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label'];
+                                $result = DB::table('contents')
+                                    ->where(function ($query) use ($array) {
+                                        foreach ($array as $key) {
+                                            $query->orWhere('content_text', 'LIKE', "%$key%");
+                                        }
+                                    })
+                                    ->delete();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Log::info("YoYarLay-Health CronJob is Working");
+    }
+}
