@@ -50,6 +50,8 @@ Route::get('/monthly/export', 'Articles\SentArticleController@export')->name('mo
 Route::put('raw_articles/sent_lotaya/{id}', 'Articles\RawArticleController@sent_lotaya')->name('raw_articles.sent_lotaya');
 Route::put('raw_articles/duplicate/{id}', 'Articles\RawArticleController@duplicate')->name('raw_articles.duplicate');
 Route::put('raw_articels/blacklist/{id}', 'Articles\RawArticleController@blacklist')->name('raw_articles.blacklist');
+Route::get('activities', 'Articles\RawArticleController@activityLog')->name('activity');
+
 
 // get data and crawl data
 Route::get('/con_get', 'Web_Scraping\LinksController@getCont');

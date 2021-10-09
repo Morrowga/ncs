@@ -2,40 +2,36 @@
 
 namespace App\Http\Controllers\Notify;
 
-use App\Models\Articles\RawArticle;
+use App\RawArticle;
 use App\ArticleRecord;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Helpers\Helper;
+use App\Handler\WebhookHandler;
 use App\Http\Controllers\Controller;
-use function App\Helpers\logText;
-
+use Spatie\WebhookServer\WebhookCall;
+use App\Helpers\Helper;
 class WebhookController extends Controller
 {
-    public function sendArticle(Request $request)
-    {
+    public function sendArticle(Request $request){
         $articles = RawArticle::with('category', 'tags', 'website')->where('update_status', '=', '1')->where('sent_status', '=', '0')->limit(10)->get();
         $data_id = [];
 
-        foreach ($articles as $uuid_data) {
-            $add = $uuid_data['uuid'];
-            array_push($data_id, $add);
+        foreach($articles as $uuid_data){
+            $add = $uuid_data['uuid'];    
+            array_push($data_id,$add);
         }
 
         $update = $request->input('update_news');
         $update_im = explode("//", $update);
 
-        // $url = 'https://devcms.mpt.com.mm/api/news/new_articles';
-
-        $url = 'https://article';
-
+        $url = 'https://devcms.mpt.com.mm/api/news/new_articles';
 
         $data = [
             'new' => $data_id,
             'update' => $update_im
         ];
 
-        $json_array = json_encode($data);
+    	$json_array = json_encode($data);
         $curl = curl_init();
         $headers = [
             'Accept: application/json',
@@ -59,46 +55,47 @@ class WebhookController extends Controller
 
         $loot = [];
 
-        if ($sent['new']) {
-            foreach ($sent['new'] as $sent_data) {
-
+        if($sent['new']){
+            foreach($sent['new'] as $sent_data){
+                
                 $raw_articles = RawArticle::where('uuid', $sent_data)->with('category', 'website')->get();
-                foreach ($raw_articles as $raw) {
+                foreach($raw_articles as $raw){
                     array_push($loot, $raw);
                 }
+
             }
 
             $loot_free = [];
 
-            foreach ($loot as $loot_once) {
-                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-                $noti_url = 'https://noti';
-                $noti_data = [
-                    "to" => "/topics/general",
-                    "data" => [
-                        "body" => "New - Development Server",
-                        "title" => $loot_once['title'],
-                        "image" => $loot_once['image'],
-                        "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                        "notiId" => $loot_once['id'],
-                        "date" => date('Y-m-d H:i:s', strtotime($loot_once['publishedDate'])),
-                        "provider" => $loot_once['website']['host']
-                    ],
-                    "priority" => "high",
-                    "android" => [
-                        "priority" => "high"
-                    ],
-                    "apns" => [
-                        "headers" => [
-                            "apns-priority" => "5"
+            foreach($loot as $loot_once){
+                    $noti_url = 'https://fcm.googleapis.com/fcm/send';                    
+                    
+                    $noti_data = [
+                        "to" => "/topics/general",
+                        "data" => [
+                            "body" => "New - Development Server",
+                            "title" => $loot_once['title'],
+                            "image" => $loot_once['image'],
+                            "sound" => "https://www.mboxdrive.com/goalsound.mp3",
+                            "notiId" => $loot_once['id'],
+                            "date" => date('Y-m-d H:i:s', strtotime($loot_once['publishedDate'])),
+                            "provider" => $loot_once['website']['host']
+                        ],
+                        "priority" => "high",
+                        "android" => [
+                            "priority" => "high"
+                        ],
+                        "apns" => [
+                            "headers" => [
+                                "apns-priority" => "5"
+                            ]
+                        ],
+                        "webpush" => [
+                            "headers" => [
+                                "Urgency" => "high"
+                            ]
                         ]
-                    ],
-                    "webpush" => [
-                        "headers" => [
-                            "Urgency" => "high"
-                        ]
-                    ]
-                ];
+                    ];
 
                 $noti_json_array = json_encode($noti_data);
                 $noti_headers = [
@@ -120,55 +117,55 @@ class WebhookController extends Controller
 
                 curl_close($curl);
 
-
-
+    
+                
                 array_push($loot_free, $noti_json_array);
             }
-        }
-
+        } 
+        
 
         $loot_update_array = [];
-        if ($sent['update']) {
-            foreach ($sent['update'] as $sent_update) {
-
+        if($sent['update']){
+            foreach($sent['update'] as $sent_update){
+                
                 $update_articles = RawArticle::where('uuid', $sent_update)->with('category', 'website')->get();
-                foreach ($update_articles as $raw_update) {
+                foreach($update_articles as $raw_update){
                     array_push($loot_update_array, $raw_update);
                 }
-            }
 
+            }
+            
             $loot_update = [];
 
-            foreach ($loot_update_array as $loot_up) {
-                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-                $noti_url = 'https://send';
-
-                $noti_data = [
-                    "to" => "/topics/general",
-                    "data" => [
-                        "body" => "Update - Development Server",
-                        "title" => $loot_up['title'],
-                        "image" => $loot_up['image'],
-                        "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                        "notiId" => $loot_up['id'],
-                        "date" => date('Y-m-d H:i:s', strtotime($loot_up['publishedDate'])),
-                        "provider" => $loot_up['website']['host']
-                    ],
-                    "priority" => "high",
-                    "android" => [
-                        "priority" => "high"
-                    ],
-                    "apns" => [
-                        "headers" => [
-                            "apns-priority" => "5"
+            foreach($loot_update_array as $loot_up){
+                    $noti_url = 'https://fcm.googleapis.com/fcm/send';                    
+                    
+                    $noti_data = [
+                        "to" => "/topics/general",
+                        "data" => [
+                            "body" => "Update - Development Server",
+                            "title" => $loot_up['title'],
+                            "image" => $loot_up['image'],
+                            "sound" => "https://www.mboxdrive.com/goalsound.mp3",
+                            "notiId" => $loot_up['id'],
+                            "date" => date('Y-m-d H:i:s', strtotime($loot_up['publishedDate'])),
+                            "provider" => $loot_up['website']['host']
+                        ],
+                        "priority" => "high",
+                        "android" => [
+                            "priority" => "high"
+                        ],
+                        "apns" => [
+                            "headers" => [
+                                "apns-priority" => "5"
+                            ]
+                        ],
+                        "webpush" => [
+                            "headers" => [
+                                "Urgency" => "high"
+                            ]
                         ]
-                    ],
-                    "webpush" => [
-                        "headers" => [
-                            "Urgency" => "high"
-                        ]
-                    ]
-                ];
+                    ];
 
                 $noti_json_array = json_encode($noti_data);
                 $noti_headers = [
@@ -190,17 +187,17 @@ class WebhookController extends Controller
 
                 curl_close($curl);
 
-
-
+    
+                
                 array_push($loot_update, $noti_json_array);
             }
         }
 
-        // return $sent['new'];
+        // return $sent['new'];            
         // dd($sent);
         // return count($sent['new'][0]);
-        if (!empty($sent['new'])) {
-            foreach ($sent['new'] as $se) {
+        if(!empty($sent['new'])){
+            foreach($sent['new'] as $se){
                 $raw_a = RawArticle::where('uuid', $se)->first();
                 $raw_a->sent_status = 1;
                 $raw_a->save();
@@ -218,8 +215,9 @@ class WebhookController extends Controller
             }
         }
 
-        $log = Helper::logText("Send Articles");
+        $log = Helper::logText("Send Articles");     
 
         return redirect()->route('modifyDataDisplay');
     }
+
 }

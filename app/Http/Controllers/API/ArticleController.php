@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Scrapes\Content;
-use App\Models\Settings\Category;
+use App\Content;
+use App\Category;
 use Carbon\Carbon;
-use App\Models\Articles\RawArticle;
-use App\Models\Settings\Website;
+use DOMDocument;
+use App\RawArticle;
+use App\Website;
 use App\ArticleRecord;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\Helper;
+
 use App\Http\Controllers\Controller;
-use DOMDocument;
-use App\Helpers\helper;
 use Illuminate\Support\Facades\Http;
 
 class ArticleController extends Controller
@@ -24,20 +25,19 @@ class ArticleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexing()
-    {
+    public function indexing(){
         $index =  request()->indexingArticles;
-        if (!empty($index)) {
-            foreach ($index as $index_data) {
+        if(!empty($index)) {
+            foreach($index as $index_data) {
                 $raw_article = new RawArticle;
                 $raw_article->source_link = $index_data['url'];
                 $raw_article->image = $index_data['imageUrl'];
-                $raw_article->host = $index_data['host'];
                 $raw_article->title = $index_data['title'];
                 $raw_article->category_id = 1;
                 $raw_article->website_id = 3;
+                $raw_article->host = "lotaya.mpt.com.mm";
                 $raw_article->content = $index_data['content'];
-                $raw_article->publishedDate = $index_data['publishedDate'];
+                $raw_article->publishedDate = date('Y-m-d H:i:s', strtotime($index_data['publishedDate']));
                 $raw_article->save();
 
                 $get_data_array = $get_array = [];
@@ -45,44 +45,44 @@ class ArticleController extends Controller
 
                 $arr_datum = explode('</p>', $raw_article->content); // ======================= remove </p>
                 foreach ($arr_datum as $datum) {
-                    if (!empty($datum)) { // =============================================== condition for removing &nbsp;
+                    if (!empty($datum)) { // =============================================== condition for removing &nbsp; *its not working*
                         $remove_p = str_replace('<p>', "", $datum); // ===================== remove <p>
 
-                        if (stripos($remove_p, '<strong>') !== false) { // =========================== find strong and remove
-                            $remove_p = str_replace('<strong>', '', $remove_p);
-                            $remove_p = str_replace('</strong>', '', $remove_p);
+                            if (stripos($remove_p, '<strong>') !== false) { // =========================== find strong and remove
+                                $remove_p = str_replace('<strong>', '', $remove_p);
+                                $remove_p = str_replace('</strong>', '', $remove_p);
 
+                                array_push($get_data_array, $remove_p);
+                            } elseif (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
+                                $dom = new DOMDocument;
+                                $dom->loadHTML($remove_p);
+                                $link_counts = $dom->getElementsByTagName('a');
+                                foreach ($link_counts as $lc) {
+                                    $link_href = $lc->getAttribute('href');
+                                }
+                                $remove_p = stristr($remove_p, '>');
+                                $remove_p = str_replace('>', '', $remove_p);
+                                $remove_p = str_replace('</a', '', $remove_p);
 
-                            array_push($get_data_array, $remove_p);
-                        } elseif (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
-                            $dom = new DOMDocument;
-                            $dom->loadHTML($remove_p);
-                            $link_counts = $dom->getElementsByTagName('a');
-                            foreach ($link_counts as $lc) {
-                                $link_href = $lc->getAttribute('href');
+                                array_push($get_data_array, $remove_p.'^'.$link_href);
+                            } elseif (strpos($remove_p, 'src') !== false) { // ========================= find img, take src and remove img
+                                $dom = new DOMDocument;
+                                $dom->loadHTML($remove_p);
+                                $img_counts = $dom->getElementsByTagName('img');
+                                foreach ($img_counts as $ic) {
+                                    $img_src = $ic->getAttribute('src');
+                                    array_push($get_data_array, $img_src);
+                                }
+
+                            } else { // ======================================================== just add text
+                                $plain_text = html_entity_decode($remove_p);
+                                $plain_text = preg_replace("/\r|\n/", "", $plain_text);
+                                $plain_text = preg_replace( '/\s+/', '', $plain_text );
+                                array_push($get_data_array, $plain_text);
+
                             }
-                            $remove_p = stristr($remove_p, '>');
-                            $remove_p = str_replace('>', '', $remove_p);
-                            $remove_p = str_replace('</a', '', $remove_p);
-
-                            array_push($get_data_array, $remove_p . '^' . $link_href);
-                        } elseif (stripos($remove_p, '<img') !== false) { // ========================= find img, take src and remove img
-                            $dom = new DOMDocument();
-                            $dom->loadHTML($remove_p);
-                            $img_counts = $dom->getElementsByTagName('img');
-                            foreach ($img_counts as $ic) {
-                                $img_src = $ic->getAttribute('src');
-                            }
-
-                            array_push($get_data_array, $img_src);
-                        } else { // ======================================================== just add text
-                            $remove_p = str_replace('&nbsp;', '', $remove_p);
-                            $remove_p = str_replace('\r\n\r\n', '', $remove_p);
-                            $remove_p = str_replace('\n', '', $remove_p);
-                            array_push($get_data_array, $remove_p);
                         }
                     }
-                }
 
                 // $count = 0;
                 $adding = new Content;
@@ -95,6 +95,7 @@ class ArticleController extends Controller
                     $adding->article_id = $raw_article->id;
                     if (stripos($datum, '^http') !== false) {
                         $adding->content_link = $datum;
+
                         $adding->save();
                     } elseif (stripos($datum, 'http') !== false) {
                         $adding->content_image = $datum;
@@ -102,6 +103,9 @@ class ArticleController extends Controller
                     } else {
                         $adding->content_text = $datum;
                         $adding->save();
+                        $space = "&nbsp;";
+                        $space_entity = html_entity_decode($space);
+                        $del = Content::where('content_text', '=' ,$space_entity)->delete();
                     }
                 }
             }
@@ -109,55 +113,55 @@ class ArticleController extends Controller
         $log = Helper::logText("Lotaya Indexing Article");
 
         // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-
-        $noti_url = 'https://send';
-
-        $noti_data = [
-            "to" => "/topics/general",
-            "data" => [
-                "body" => "Development Server",
-                "title" => $raw_article->title,
-                "image" => $raw_article->image,
-                "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                "notiId" => $raw_article->id,
-                "date" => $raw_article->publishedDate,
-                "provider" => "Lotaya Indexing"
-            ],
-            "priority" => "high",
-            "android" => [
-                "priority" => "high"
-            ],
-            "apns" => [
-                "headers" => [
-                    "apns-priority" => "5"
-                ]
-            ],
-            "webpush" => [
-                "headers" => [
-                    "Urgency" => "high"
-                ]
-            ]
-        ];
-
-        $noti_json_array = json_encode($noti_data);
-        $noti_headers = [
-            'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
-            'Accept: application/json',
-            'Content-Type: application/json',
-        ];
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $noti_url);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_HEADER, 1);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-
-        $response = curl_exec($curl);
-        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        curl_close($curl);
+        //         $noti_data = [
+        //             "to" => "/topics/general",
+        //             "data" => [
+        //                 "topic" => "NCS Articles",
+        //                 "body" => "Production Server",
+        //                 "title" => $raw_article->title,
+        //                 "image" => $raw_article->image,
+        //                 "sound" => "https://www.mboxdrive.com/goalsound.mp3",
+        //                 "notiId" => $raw_article->id,
+        //                 "date" => $raw_article->publishedDate,
+        //                 "provider" => "Lotaya Indexing"
+        //             ],
+        //             "priority" => [
+        //                 "priority" => "high",
+        //                 "android" => [
+        //                   "priority" => "high"
+        //                 ],
+        //             "apns" => [
+        //                 "headers" => [
+        //                     "apns-priority" => "5"
+        //                         ]
+        //                     ]
+        //                 ],
+        //             "webpush" => [
+        //                 "headers" => [
+        //                     "Urgency" => "high"
+        //                     ]
+        //                 ]
+        //             ];
+        
+        //         $noti_json_array = json_encode($noti_data);
+        //         $noti_headers = [
+        //             'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
+        //             'Accept: application/json',
+        //             'Content-Type: application/json',
+        //         ];
+        //         $curl = curl_init();
+        //         curl_setopt($curl, CURLOPT_URL, $noti_url);
+        //         curl_setopt($curl, CURLOPT_POST, 1);
+        //         curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
+        //         curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
+        //         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        //         curl_setopt($curl, CURLOPT_HEADER, 1);
+        //         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        
+        //         $response = curl_exec($curl);
+        //         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        
+        //         curl_close($curl);
 
         return [
             "success" => true,
@@ -165,38 +169,39 @@ class ArticleController extends Controller
         ];
     }
 
+
     public function index($id = null)
     {
         $article = RawArticle::where([['update_status', '=', '1'], ['uuid', $id]])->first();
         // return $article->content;
         $result = $content_array = $content_data_text = $content_data_image = $content_data_link = $tag_lists = [];
-        $contents = Content::where('article_id', '=', $article->id)->get();
-
+        $contents = Content::where('article_id','=', $article->id)->get();
+        
         if ($contents) {
-            foreach ($contents as $content) {
-                if ($content['content_text'] != null) {
-                    $content_data_text = [
-                        "key" => "content",
-                        "value" => $content['content_text']
-                    ];
-                    array_push($content_array, $content_data_text);
+            foreach($contents as $content){
+                if($content['content_text'] != null){
+                $content_data_text = [
+                    "key" => "content",
+                    "value" => $content['content_text']
+                ] ;
+                array_push($content_array, $content_data_text);
                 }
-                if ($content['content_image'] != null) {
+                if($content['content_image'] != null){
                     $hots = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
-                    if ($hots) {
+                    if($hots){
                         $content_data_image = [
                             "key" => "image",
                             "value" => "http://139.59.110.228/storage/" . $content['content_image']
-                        ];
+                        ] ;
                     } else {
                         $content_data_image = [
                             "key" => "image",
                             "value" => $content['content_image']
-                        ];
+                        ] ;
                     }
                     array_push($content_array, $content_data_image);
                 }
-                if ($content['content_link'] != null) {
+                if($content['content_link'] != null) {
                     $content_data_link = [
                         "key" => "link",
                         "value" => $content['content_link']
@@ -207,7 +212,7 @@ class ArticleController extends Controller
         }
 
         if ($id) {
-            $article = RawArticle::where([['update_status', '=', '1'], ['uuid', $id]])->with('website', 'category')->first();
+            $article = RawArticle::where([['update_status','=', '1'], ['uuid', $id]])->with('website','category')->first();
             if ($article) {
                 foreach ($article->tags as $tag) {
                     array_push($tag_lists, $tag->nameMm);
@@ -240,10 +245,10 @@ class ArticleController extends Controller
                 $result['data'] = 'There is no such a data.';
             }
         } else {
-            $result['success'] = false;
-            $result['data'] = 'There is no such id.';
+           $result['success'] = false;
+           $result['data'] = 'There is no such id.';
         }
-        $log = Helper::logText("New Single Article");
+        $log = Helper::logText("New Single Article");     
 
         return $result;
     }
@@ -293,43 +298,42 @@ class ArticleController extends Controller
         //
     }
 
-    public function get_all_articles()
-    {
+    public function get_all_articles() {
         $array_ids = request()->input('article_ids');
         $arr = $result = $styled_data = $content_array = $content_data_text = $content_data_image = $content_data_link = $tag_lists = [];
-
+        
         if (!empty($array_ids)) {
             if (count($array_ids) > 1) {
                 foreach ($array_ids as $get_id) {
-
+                    
                     $article = RawArticle::where([['update_status', '=', '1'], ['uuid', $get_id]])->first();
-
+                    
                     if ($article) {
-                        $contents = Content::where('article_id', '=', $article->id)->get();
-                        foreach ($contents as $content) {
-                            if ($content['content_text'] != null) {
+                        $contents = Content::where('article_id','=', $article->id)->get();
+                        foreach($contents as $content){
+                            if($content['content_text'] != null) {
                                 $content_data_text = [
                                     "key" => "content",
                                     "value" => $content['content_text']
                                 ];
                                 array_push($content_array, $content_data_text);
                             }
-                            if ($content['content_image'] != null) {
+                            if($content['content_image'] != null) {
                                 $hots = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
-                                if ($hots) {
+                                if($hots){
                                     $content_data_image = [
                                         "key" => "image",
                                         "value" => "http://139.59.110.228/storage/" . $content['content_image']
-                                    ];
+                                    ] ;
                                 } else {
                                     $content_data_image = [
                                         "key" => "image",
                                         "value" => $content['content_image']
-                                    ];
+                                    ] ;
                                 }
                                 array_push($content_array, $content_data_image);
                             }
-                            if ($content['content_link'] != null) {
+                            if($content['content_link'] != null) {
                                 $content_data_link = [
                                     "key" => "link",
                                     "value" => $content['content_link']
@@ -370,31 +374,31 @@ class ArticleController extends Controller
                 // $array_ids[0]
                 $article = RawArticle::where('uuid', $array_ids[0])->first();
                 if ($article) {
-                    $contents = Content::where('article_id', '=', $article->id)->get();
-                    foreach ($contents as $content) {
-                        if ($content['content_text'] != null) {
+                    $contents = Content::where('article_id','=', $article->id)->get();
+                    foreach($contents as $content){
+                        if($content['content_text'] != null) {
                             $content_data_text = [
                                 "key" => "content",
                                 "value" => $content['content_text']
                             ];
                             array_push($content_array, $content_data_text);
                         }
-                        if ($content['content_image'] != null) {
+                        if($content['content_image'] != null) {
                             $hots = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
-                            if ($hots) {
+                            if($hots){
                                 $content_data_image = [
                                     "key" => "image",
                                     "value" => "http://139.59.110.228/storage/" . $content['content_image']
-                                ];
+                                ] ;
                             } else {
                                 $content_data_image = [
                                     "key" => "image",
                                     "value" => $content['content_image']
-                                ];
+                                ] ;
                             }
                             array_push($content_array, $content_data_image);
                         }
-                        if ($content['content_link'] != null) {
+                        if($content['content_link'] != null) {
                             $content_data_link = [
                                 "key" => "link",
                                 "value" => $content['content_link']
@@ -436,13 +440,12 @@ class ArticleController extends Controller
             $result['data'] = null;
         }
 
-        $log = Helper::logText("Multi New Articles");
-
+        $log = Helper::logText("Multi New Articles"); 
+        
         return $result;
     }
 
-    public function get_related_artilces()
-    {
+    public function get_related_artilces() {
         $id = request()->input('article_id');
         $arr = [];
         $result = [];
@@ -478,13 +481,12 @@ class ArticleController extends Controller
             $result['related_articles'] = [];
         }
 
-        $log = Helper::logText("Related Articles");
+        $log = Helper::logText("Related Articles");     
 
         return $result;
     }
-
-    public function get_engagement_articles()
-    {
+    
+    public function get_engagement_articles() {
         $result = [];
         $arr = [];
         $engage_data = request()->input('engagements');
@@ -507,8 +509,8 @@ class ArticleController extends Controller
             $result['message'] = 'Eagagement data successfully updated.';
 
             // $url = 'https://cms.mpt.com.mm/api/news/update_order';
-            $url = 'https://update';
-
+            $url = 'https://devcms.mpt.com.mm/api/news/update_order';
+            
             $data = [
                 "type" =>  "score_update"
             ];
@@ -531,21 +533,21 @@ class ArticleController extends Controller
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             curl_close($curl);
+
         } else {
             $result['success'] = false;
             $result['error'] = 'Eagagement data cannot update.';
         }
 
-        $log = Helper::logText("Engagements");
+        $log = Helper::logText("Engagements");     
 
         return $result;
     }
 
-    public function get_trend()
-    {
+    public function get_trend() {
         $time_one = date('Y-m-d H:i:s', strtotime(Carbon::now()->subHours(6)));
         $time_two = date('Y-m-d H:i:s', strtotime(Carbon::create($time_one)->subHours(18)));
-
+        
         $window_one = $window_two = $arr_one = $arr_two = $result = $window_one_array = $window_two_array = [];
         $view_one_order_one = $view_one_order_two = $view_two_order_one = $view_two_order_two = [];
         $current_date = date('Y-m-d');
@@ -585,6 +587,7 @@ class ArticleController extends Controller
                 ->orderByDesc('raw_articles.publishedDate')
                 ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
                 ->get();
+
         }
         // with or without category_id, two arrays will be execute
         if ($articles_one) {
@@ -613,88 +616,83 @@ class ArticleController extends Controller
             }
         }
         $two_count = 0;
-
+        
         $result['success'] = true;
         $result['trending_articles'] = ['window_one' => $arr_one, 'window_two' => $arr_two];
-
-        $log = Helper::logText("Trending");
+        
+        $log = Helper::logText("Trending");     
 
         return $result;
     }
-
-    public function getMax()
-    {
+	
+	public function getMax(){
         $articles_one = DB::table('raw_articles')
-            ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
-            ->where([
-                ['raw_articles.update_status', '1'],
-                ['raw_articles.sent_status', '1'],
-                ['raw_articles.publishedDate', '>=', date('Y-m-d H:i:s', strtotime('2021-09-05 00:00:01'))],
-                ['raw_articles.publishedDate', '<=', date('Y-m-d H:i:s', strtotime('2021-09-06 23:59:59'))],
-            ])
-            ->orderByDesc('article_records.view_count')
-            ->orderByDesc('article_records.article_id')
-            ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
-            ->limit(20)
-            ->get();
+                ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
+                ->where([
+                    ['raw_articles.update_status', '1'],
+                    ['raw_articles.sent_status', '1'],
+                    ['raw_articles.publishedDate', '>=', date('Y-m-d H:i:s', strtotime('2021-09-05 00:00:01'))],
+                    ['raw_articles.publishedDate', '<=', date('Y-m-d H:i:s', strtotime('2021-09-06 23:59:59'))],
+                ])
+                ->orderByDesc('article_records.view_count')
+                ->orderByDesc('article_records.article_id')
+                ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
+                ->limit(20)
+                ->get();
 
-        print_r("<pre>");
-        print_r($articles_one);
-    }
+		print_r("<pre>");
+		print_r($articles_one);
+	}
 
-    public function get_six()
-    {
+	public function get_six(){
         $time_one = date('Y-m-d H:i:s', strtotime(Carbon::now()->subHours(6)));
         $time_two = date('Y-m-d H:i:s', strtotime(Carbon::create($time_one)->subHours(18)));
         $arr_one = $arr_two = [];
 
         $articles_one = DB::table('raw_articles')
-            ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
-            ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '>=', $time_one]])
-            ->orderByDesc('article_records.view_count')
-            ->orderByDesc('raw_articles.publishedDate')
-            // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
-            ->select('raw_articles.title', 'raw_articles.id', 'article_records.view_count')
-            ->get();
+                ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
+                ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '>=', $time_one]])
+                ->orderByDesc('article_records.view_count')
+                ->orderByDesc('raw_articles.publishedDate')
+                // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
+                ->select('raw_articles.title', 'raw_articles.id', 'article_records.view_count')
+                ->get();
 
         print_r('<pre>');
         print_r($articles_one);
-    }
+	}
 
-    public function get_18()
-    {
+	public function get_18(){
         $time_one = date('Y-m-d H:i:s', strtotime(Carbon::now()->subHours(6)));
         $time_two = date('Y-m-d H:i:s', strtotime(Carbon::create($time_one)->subHours(18)));
         $arr_one = $arr_two = [];
-
+        
         $articles_one = DB::table('raw_articles')
-            ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
-            ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '<=', $time_one], ['raw_articles.publishedDate', '>=', $time_two]])
-            ->orderByDesc('article_records.view_count')
-            ->orderByDesc('raw_articles.publishedDate')
-            // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
-            ->select('raw_articles.title', 'raw_articles.id', 'article_records.view_count')
-            ->get();
+                ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
+                ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '<=', $time_one], ['raw_articles.publishedDate', '>=', $time_two]])
+                ->orderByDesc('article_records.view_count')
+                ->orderByDesc('raw_articles.publishedDate')
+                // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
+                ->select('raw_articles.title', 'raw_articles.id', 'article_records.view_count')
+                ->get();
 
         print_r('<pre>');
         print_r($articles_one);
-    }
+	}
 
-    public function getTransferData()
-    {
+    public function getTransferData(){
         $client = new Client();
-        // $uri = 'https://ncsmm.com/transferData';
-        $uri = 'https://gg';
+        $uri = 'https://ncsmm.com/transferData';
         $res = $client->get($uri);
         $data = json_decode($res->getBody()->getContents(), true);
         $status = 'false';
 
         foreach ($data as $d) {
             $raw = RawArticle::where('title', $d['title'])->first();
-            if ($raw) {
-                $hasData = Content::where('article_id', $raw->id)->get();
+            if($raw){
+                $hasData = Content::where('article_id' , $raw->id)->get();
 
-                if ($hasData->count() < 1) {
+                if($hasData->count() < 1){
                     foreach ($d['content'] as $con) {
                         $content = new Content();
                         $content->article_id = $raw->id;
@@ -707,7 +705,7 @@ class ArticleController extends Controller
                 }
             }
         }
-        $log = Helper::logText("TransferData");
+        $log = Helper::logText("TransferData");     
 
         return $status;
     }

@@ -13,6 +13,7 @@ use App\Models\Scrapes\Content;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use App\Log;
 use PHPUnit\TextUI\Help;
 
 class RawArticleController extends Controller
@@ -247,5 +248,22 @@ class RawArticleController extends Controller
         }
 
         return view('laravellog', compact('data', 'date'));
+    }
+    public function activityLog(Request $request){
+        $search =  $request->input('q');
+        if($search!=""){
+            $logs = Log::where(function ($query) use ($search){
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('created_at', 'like', '%'.$search.'%');
+            })
+            ->paginate(10);
+            $logs->appends(['q' => $search]);
+        }
+        else{
+            $startDate = Carbon::createFromFormat('d/m/Y', '01/10/2021');
+            $endDate = Carbon::now();
+            $logs = Log::orderBy('created_at', 'DESC')->whereBetween('created_at', [$startDate, $endDate])->paginate(10);
+        }
+        return view('activitylog', compact('logs'));
     }
 }

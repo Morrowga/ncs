@@ -244,9 +244,13 @@
                     <li class="nav-item w-100">
                         <a class="nav-link" href="{{ route('laravellogs') }}">
                             <i class="fe fe-layers fe-16"></i>
-                            <span class="ml-3 item-text">{{ __('Log') }}</span>
-                            <span
-                                class="badge badge-pill badge-danger increase-size  pt-1">{{ $count_reject_article }}</span>
+                            <span class="ml-3 item-text">{{ __('Server Logs') }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item w-100">
+                        <a class="nav-link" href="{{ route('activity') }}">
+                            <i class="fe fe-layers fe-16"></i>
+                            <span class="ml-3 item-text">{{ __('Activity Logs') }}</span>
                         </a>
                     </li>
                 </ul>
