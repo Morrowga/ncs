@@ -6,11 +6,18 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Articles\RawArticle;
 use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Website;
+use App\Models\Settings\Category;
+use App\Models\Settings\Tag;
 use Illuminate\Http\Request;
 
 
 class RejectArticleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -29,18 +36,18 @@ class RejectArticleController extends Controller
         } elseif ($search_type == 3) {
             $searching = ['title', 'LIKE', "%$search_data%"];
         } elseif ($search_type == 4) {
-            $searching = ['published_date', date('Y-m-d H:i:s', strtotime($search_data))];
+            $searching = ['publishedDate', date('Y-m-d H:i:s', strtotime($search_data))];
         } else {
             $searching = ['id', '!=', NULL];
         }
 
         $reject_articles = RawArticle::with('website', 'category', 'tags')
             ->where([
-                ['status', '>', 1],
+                ['sent_status', '>', 1],
                 // ['status', '=', '3'],
                 $searching
             ])
-            ->orderByDesc('published_date');
+            ->orderByDesc('publishedDate');
         $default = [
             'reject_articles' => $reject_articles->paginate(15),
             'search_type' => $search_type,
@@ -84,9 +91,13 @@ class RejectArticleController extends Controller
         //
         $raws = RawArticle::with('category', 'website', 'tags')->find($id);
         $contents = Content::where('article_id', $raws->id)->get();
+        // $check_duplicate = Helper::checkDuplicate($id);
+        $blacklist = Helper::checkBlacklist($id);
         $default = [
             'title' => 'Raw Article Detail',
             'raws' => $raws->find($id),
+            'blacklist' => $blacklist,
+            // 'check_duplicate' => $check_duplicate
         ];
         // dd($contents);
         return view('articles.raw_articles.detail', $default)->with('contents', $contents);
@@ -101,6 +112,20 @@ class RejectArticleController extends Controller
     public function edit($id)
     {
         //
+        $raws = RawArticle::with('website', 'category', 'tags')->find($id);
+        $categories = Category::get();
+        $websites = Website::get();
+        $tags = Tag::get();
+
+        $contents = Content::where('article_id', $raws->id)->get();
+        // $suggesting_tags = Helper::suggestTags($id);
+
+        $default = [
+            'title' => 'Edit Raw Article',
+            'raws' => $raws,
+            // 'suggest' => $suggesting_tags
+        ];
+        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents'));
     }
 
     /**

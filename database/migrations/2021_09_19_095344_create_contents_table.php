@@ -17,8 +17,8 @@ class CreateContentsTable extends Migration
             $table->increments('id');
             $table->integer('article_id')->nullable();
             $table->longText('content_text')->nullable();
-            $table->string('content_image')->nullable();
-            $table->string('content_link', 355)->nullable();
+            $table->longText('content_image')->nullable();
+            $table->longText('content_link', 355)->nullable();
             $table->timestamps();
         });
     }

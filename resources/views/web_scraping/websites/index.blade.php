@@ -54,7 +54,7 @@
                                     <th width="7%" class="text-center">No:</th>
                                     <th width="25%">Host Name</th>
                                     <th>Name</th>
-                                    <th>Category</th>
+                                    <th>Provider Category</th>
                                     <th width="13%" class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -63,8 +63,8 @@
                                 <tr>
                                     <td class="text-center">{{ __(++$i) }}</td>
                                     <td>{{ __($ws->host) }}</td>
-                                    <td class="text-capitalize">{{ $ws->name ? __($ws->name) : '-' }}</td>
-                                    <td class="text-capitalize">{{ __($ws->provider_category) }}</td>
+                                    <td class="text-capitalize">{{ $ws->title ? __($ws->title) : '-' }}</td>
+                                    <td class="text-capitalize">{{ __($ws->providerCategory) }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('website.edit', $ws->id) }}"
                                             class="btn btn-sm btn-outline-warning rounded-circle"><i

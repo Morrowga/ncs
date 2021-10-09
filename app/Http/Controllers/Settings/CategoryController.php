@@ -9,6 +9,10 @@ use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -17,30 +21,30 @@ class CategoryController extends Controller
     public function index()
     {
         $search_name = request()->input('search_name');
-        $search_name_mm = request()->input('search_name_mm');
+        $search_nameMm = request()->input('search_nameMm');
 
         if ($search_name) {
             $search_name_query = ['name', $search_name];
         } else {
             $search_name_query = ['name', '!=', NULL];
         }
-        if ($search_name_mm) {
-            $search_name_mm_query = ['name_mm', $search_name_mm];
+        if ($search_nameMm) {
+            $search_nameMm_query = ['nameMm', $search_nameMm];
         } else {
-            $search_name_mm_query = ['name_mm', '!=', NULL];
+            $search_nameMm_query = ['nameMm', '!=', NULL];
         }
 
         $categories = Category::where([
             $search_name_query,
-            $search_name_mm_query,
+            $search_nameMm_query,
         ])->paginate(10);
         $default = [
             'title' => 'Categories List',
             'categories' => $categories,
             'search_name' => $search_name,
-            'search_name_mm' => $search_name_mm,
+            'search_nameMm' => $search_nameMm,
         ];
-        
+
         return view('settings.categories.index', $default)->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
@@ -66,17 +70,18 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'id_name' => 'nullable',
             'name' => 'required|unique:categories|max:255',
-            'name_mm' => 'required|unique:categories|max:255',
+            'nameMm' => 'required|unique:categories|max:255',
         ]);
 
         $category = new Category;
+        $category->id_name = Str::lower($request->input('name'));
         $category->name = Str::lower($request->input('name'));
-        $category->name_mm = $request->input('name_mm');
+        $category->nameMm = $request->input('nameMm');
         $category->save();
 
         return redirect(route('category.index'))->with('success', 'Successfully Created!');
-        
     }
 
     /**
@@ -87,7 +92,7 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        // 
+        //
     }
 
     /**
@@ -102,7 +107,7 @@ class CategoryController extends Controller
             'title' => 'Edit Category',
             'category' => Category::find($id)
         ];
-        
+
         return view('settings.categories.create', $default);
     }
 
@@ -116,13 +121,15 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
+            'id_name' => 'nullable',
             'name' => 'required|max:255',
-            'name_mm' => 'required|max:255',
+            'nameMm' => 'required|max:255',
         ]);
 
         $category = Category::find($id);
+        $category->id_name = Str::lower($request->input('name'));
         $category->name = Str::lower($request->input('name'));
-        $category->name_mm = $request->input('name_mm');
+        $category->nameMm = $request->input('nameMm');
         $category->save();
 
         return redirect(route('category.index'))->with('success', 'Successfully Edited!');

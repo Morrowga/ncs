@@ -72,22 +72,22 @@
                                 <td>{{ $reject->uuid }}</td>
                                 <td>{{ Str::limit($reject->title, 80, '...')}}</td>
                                 <td>
-                                    @if($reject->status == 2)
+                                    @if($reject->sent_status == 2)
                                     <p style="color:red;">Blacklist</p>
                                     @endif
-                                    @if($reject->status == 3)
+                                    @if($reject->sent_status == 3)
                                     <p style="color:#eea303">Duplicate</p>
                                     @endif
                                 </td>
-                                <td>{{ $reject->published_date}}</td>
+                                <td>{{ $reject->publishedDate}}</td>
                                 <td>
-                                    {{-- <a href="{{route('reject_articles.show',$reject->id)}}"
-                                    class="btn btn-sm btn-outline-primary rounded-circle pd-2">
-                                    <i class="fe fe-eye fe-16"></i></a> --}}
-                                    {{-- <a href="{{ route('raw_articles.edit',$reject->id)}}"
-                                    class="btn btn-sm btn-outline-warning rounded-circle"><i
-                                        class="fe fe-edit fe-16"></i>
-                                    </a> --}}
+                                    <a href="{{route('raw_articles.show',$reject->id)}}"
+                                        class="btn btn-sm btn-outline-primary rounded-circle pd-2">
+                                        <i class="fe fe-eye fe-16"></i></a>
+                                    <a href="{{ route('raw_articles.edit',$reject->id)}}"
+                                        class="btn btn-sm btn-outline-warning rounded-circle"><i
+                                            class="fe fe-edit fe-16"></i>
+                                    </a>
                                     <a href="#delete-modal" data-toggle="modal"
                                         class="btn btn-sm btn-outline-danger rounded-circle"
                                         data-route="{{ route('raw_articles.destroy', $reject->id) }}"><i

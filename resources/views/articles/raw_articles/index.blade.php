@@ -58,19 +58,22 @@
                             <thead class="thead-dark">
                                 <tr>
                                     <th width="5%" class="text-center">ID</th>
-                                    <th width="20%" class="text-center">UUID</th>
+                                    <th width="10%" class="text-center">UUID</th>
                                     <th width="30%">Title</th>
-                                    <th width="12%" class="text-center">Published DATE</th>
-                                    <th width="10%" class="text-center">Actions</th>
+                                    <th width="10%">Website</th>
+                                    <th width="15%" class="text-center">Published DATE</th>
+                                    <th width="12%" class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($raw_articles as $raw)
+                                {{-- {{ dd($raw_articles)}} --}}
                                 <tr>
                                     <td>{{ $raw->id }}</td>
                                     <td>{{ $raw->uuid }}</td>
                                     <td>{{ Str::limit($raw->title, 80, '...')}}</td>
-                                    <td>{{ $raw->published_date}}</td>
+                                    <td>{{ $raw->website->title}}</td>
+                                    <td>{{ $raw->publishedDate}}</td>
 
 
                                     <td>

@@ -35,8 +35,8 @@
                                 </div>
                                 <div class="form-group col-auto">
                                     <label for="search" class="sr-only">{{ __('Name MM') }}</label>
-                                    <input type="text" name="search_name_mm" class="form-control rounded-0"
-                                        value="{{ $search_name_mm }}" placeholder="{{ __('Name MM') }} ..">
+                                    <input type="text" name="search_nameMm" class="form-control rounded-0"
+                                        value="{{ $search_nameMm }}" placeholder="{{ __('Name MM') }} ..">
                                 </div>
                                 <div class="form-group col-auto">
                                     <button type="submit" class="btn btn-outline-primary rounded-0"><i
@@ -70,7 +70,7 @@
                                     <td class="text-center">{{ __(++$i) }}</td>
                                     <td>{{ __($ctg->name) }}</td>
                                     <td class="text-capitalize">{{ __($ctg->name) }}</td>
-                                    <td>{{ __($ctg->name_mm) }}</td>
+                                    <td>{{ __($ctg->nameMm) }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('category.edit', $ctg->id) }}"
                                             class="btn btn-sm btn-outline-warning rounded-circle"><i

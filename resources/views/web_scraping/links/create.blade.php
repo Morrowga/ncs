@@ -26,7 +26,7 @@
                 <select name="website_id" class="form-control rounded-0 s2" id="website_id" required>
                     <option value="">{{ __('Choose Provider Website Name ..') }}</option>
                     @foreach($websites as $website)
-                    <option value="{{ $website->id }}">{{ $website->name }}</option>
+                    <option value="{{ $website->id }}">{{ $website->title }}</option>
                     @endforeach
                 </select>
             </div>
@@ -37,7 +37,7 @@
                     required>
                     <option value="" aria-readonly="">{{ __('Choose Category Name ..') }}</option>
                     @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }} ({{ $category->name_mm }})</option>
+                    <option value="{{ $category->id }}">{{ $category->name }} ({{ $category->nameMm }})</option>
                     @endforeach
                 </select>
             </div>

@@ -19,9 +19,10 @@
                         <tr>
                             <th width="5%" class="text-center">UUID</th>
                             <th width="5%" class="text-center">Host</th>
-                            <th width="25%">Myanmar Time</th>
+                            <th width="25%%" class="text-center">Title</th>
+                            <th width="9%">Myanmar Time</th>
                             <th width="9%" class="text-center">Myanmar Date</th>
-                            <th width="9%" class="text-center">Title</th>
+
                             <th width="9%" class="text-center">Original Category</th>
                             <th width="8%" class="text-center">Lotaya Category</th>
                             <th width="4%" class="text-center">Reject</th>
@@ -34,9 +35,9 @@
                             <td>{{ $sent->uuid }}</td>
                             <td>{{ $sent->website->host }}</td>
                             <td>{{ Str::limit($sent->title, 80, '...')}}</td>
-                            <td>{{ $sent->published_date}}</td>
-                            <td>{{ $sent->published_date}}</td>
-                            <td>{{ $sent->website->provider_category}}</td>
+                            <td>{{ $sent->publishedDate}}</td>
+                            <td>{{ $sent->publishedDate}}</td>
+                            <td>{{ $sent->website->providerCategory}}</td>
                             <td>{{ $sent->category->name }}</td>
                             <td></td>
                             <td></td>

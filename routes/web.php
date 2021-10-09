@@ -21,7 +21,7 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 // Category
 Route::resource('category', 'Settings\CategoryController');
-Route::resource('keyword', 'Settings\KeywordController');
+Route::resource('tag', 'Settings\TagController');
 
 // Web Crawl and Scrape
 Route::resource('website', 'Web_Scraping\WebsiteController');
@@ -41,9 +41,11 @@ Route::resource('reject_articles', 'Articles\RejectArticleController');
 
 // report
 Route::get('/monthly', 'Articles\SentArticleController@monthly')->name('monthly');
-// Route::get('/monthly/excel', 'Articles\SentArticleController@excel')->name('monthly.excel');
+//log
+Route::get('/larave_logs', 'Articles\RawArticleController@laravelLog')->name('laravellogs');
 //excel
 Route::get('/monthly/export', 'Articles\SentArticleController@export')->name('monthly.export');
+// Route::get('/monthly/excel', 'Articles\SentArticleController@excel')->name('monthly.excel');
 
 Route::put('raw_articles/sent_lotaya/{id}', 'Articles\RawArticleController@sent_lotaya')->name('raw_articles.sent_lotaya');
 Route::put('raw_articles/duplicate/{id}', 'Articles\RawArticleController@duplicate')->name('raw_articles.duplicate');
@@ -61,3 +63,4 @@ Route::get('/yyl_ent', 'Web_Scraping\LinksController@yoyar_ent');
 Route::get('/edge', 'Web_Scraping\LinksController@edge');
 Route::get('/wedding', 'Web_Scraping\LinksController@wedding_guide');
 Route::get('/yathar', 'Web_Scraping\LinksController@yathar');
+Route::get('/builders_guide', 'Web_Scraping\LinksController@builders_guide');

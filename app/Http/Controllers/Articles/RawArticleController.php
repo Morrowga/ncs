@@ -4,16 +4,23 @@ namespace App\Http\Controllers\Articles;
 
 use App\Models\Articles\RawArticle;
 use App\Models\Scrapes\Website;
-use App\Models\Settings\Keyword;
+use App\Models\Settings\Tag;
 use App\Models\Settings\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
 use App\Models\Scrapes\Content;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use PHPUnit\TextUI\Help;
 
 class RawArticleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -37,10 +44,10 @@ class RawArticleController extends Controller
         }
         $categories = Category::get();
         $websites = Website::get();
-        $tags = Keyword::get();
+        $tags = Tag::get();
         $raw_articles = RawArticle::with('category', 'website', 'tags')
             ->where([
-                ['status', 0],
+                ['sent_status', 0],
                 $searching
             ])
             ->orderByDesc('id');
@@ -75,7 +82,7 @@ class RawArticleController extends Controller
             'title' => 'Create Raw Article',
             'websites' => Website::get(),
             'categories' => Category::get(),
-            'tags' => Keyword::get(),
+            'tags' => Tag::get(),
         ];
         return view('articles.raw_articles.create', $default);
     }
@@ -93,7 +100,7 @@ class RawArticleController extends Controller
         $raws->source_link = $request->source_link;
         $raws->website_id = $request->website_id;
         $raws->category_id = $request->category_id;
-        $raws->published_date = date('Y-m-d H:i:s', strtotime($request->publishedDate));
+        $raws->publishedDate = date('Y-m-d H:i:s', strtotime($request->publishedDate));
 
         $raws->title = tounicode($request->title);
         //image
@@ -120,10 +127,12 @@ class RawArticleController extends Controller
         $contents = Content::where('article_id', $raws->id)->get();
         // $check_duplicate = Helper::checkDuplicate($id);
         $blacklist = Helper::checkBlacklist($id);
+        $sensitive = Helper::sensitive_keywords($id);
         $default = [
             'title' => 'Raw Article Detail',
             'raws' => $raws->find($id),
             'blacklist' => $blacklist,
+            'sensitive' => $sensitive
             // 'check_duplicate' => $check_duplicate
         ];
         // dd($contents);
@@ -142,17 +151,23 @@ class RawArticleController extends Controller
         $raws = RawArticle::with('website', 'category', 'tags')->find($id);
         $categories = Category::get();
         $websites = Website::get();
-        $tags = Keyword::get();
+        $tags = Tag::get();
 
         $contents = Content::where('article_id', $raws->id)->get();
-        $suggesting_tags = Helper::suggestTags($id);
+        $suggesting_tags = Helper::suggest_tags($id);
+        $suggest_category = Helper::suggest_category($id);
+        $suggest_indexing = Helper::indexing_category($id);
+        $suggest_website = Helper::suggest_website($id);
+        $indexing_tags = Helper::indexing_tags($id);
+        // $test =  Helper::categorywith_title($id);
+
 
         $default = [
             'title' => 'Edit Raw Article',
             'raws' => $raws,
             // 'suggest' => $suggesting_tags
         ];
-        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents', 'suggesting_tags'));
+        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents', 'suggesting_tags', 'suggest_category', 'suggest_indexing', 'suggest_website', 'indexing_tags'));
     }
 
     /**
@@ -170,7 +185,7 @@ class RawArticleController extends Controller
         $raws->source_link = $request->source_link;
         $raws->website_id = $request->website_id;
         $raws->category_id = $request->category_id;
-        $raws->published_date = date('Y-m-d H:i:s', strtotime($request->publishedDate));
+        $raws->publishedDate = date('Y-m-d H:i:s', strtotime($request->publishedDate));
 
         $raws->title = $request->title;
         //image
@@ -201,7 +216,7 @@ class RawArticleController extends Controller
     public function sent_lotaya($id)
     {
         $raw_articles = RawArticle::with('website', 'category', 'tags')->findorFail($id);
-        $raw_articles->status = 1;
+        $raw_articles->sent_status = 1;
         $raw_articles->save();
         return redirect()->route('sent_articles.index', compact('raw_articles'))->with('success', 'Successfully Send!');
     }
@@ -209,7 +224,7 @@ class RawArticleController extends Controller
     public function duplicate($id)
     {
         $raw_articles = RawArticle::with('website', 'category', 'tags')->findorFail($id);
-        $raw_articles->status = 3;
+        $raw_articles->sent_status = 3;
         $raw_articles->save();
         return redirect()->route('raw_articles.index', compact('raw_articles'))->with('success', 'Successfully Duplicate!');
     }
@@ -217,8 +232,20 @@ class RawArticleController extends Controller
     public function blacklist($id)
     {
         $raw_articles = RawArticle::with('website', 'category', 'tags')->findOrFail($id);
-        $raw_articles->status = 2;
+        $raw_articles->sent_status = 2;
         $raw_articles->save();
         return redirect()->route('raw_articles.index', compact('raw_articles'))->with('success', 'Successfully Blacklist!');
+    }
+    public function laravelLog(Request $request)
+    {
+        $date =  new Carbon($request->get('date', today()));
+        $data = [];
+        $filePath = storage_path() . '/logs/laravel-' . $date->format('Y-m-d') . '.log';
+        // dd($filePath);
+        if (File::exists($filePath)) {
+            $data = File::get($filePath);
+        }
+
+        return view('laravellog', compact('data', 'date'));
     }
 }

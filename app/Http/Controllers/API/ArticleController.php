@@ -507,7 +507,7 @@ class ArticleController extends Controller
             $result['message'] = 'Eagagement data successfully updated.';
 
             // $url = 'https://cms.mpt.com.mm/api/news/update_order';
-            $url = 'https://devcms.mpt.com.mm/api/news/update_order';
+            $url = 'https://update';
 
             $data = [
                 "type" =>  "score_update"
@@ -683,7 +683,8 @@ class ArticleController extends Controller
     public function getTransferData()
     {
         $client = new Client();
-        $uri = 'https://ncsmm.com/transferData';
+        // $uri = 'https://ncsmm.com/transferData';
+        $uri = 'https://gg';
         $res = $client->get($uri);
         $data = json_decode($res->getBody()->getContents(), true);
         $status = 'false';

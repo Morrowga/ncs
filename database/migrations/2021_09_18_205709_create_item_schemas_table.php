@@ -14,7 +14,7 @@ class CreateItemSchemasTable extends Migration
     public function up()
     {
         Schema::create('item_schemas', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->string('title');
             $table->boolean('is_full_url')->default(1);   // whether this is a full link to article or partial link
             $table->text('css_expression');    // expression defines the selectors structure for this item i.e (a > p) find all p tags inside a

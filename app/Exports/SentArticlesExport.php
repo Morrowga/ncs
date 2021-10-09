@@ -14,9 +14,10 @@ class SentArticlesExport implements FromCollection
     public function collection()
     {
         //monthly
+        $month = 9;
         $monthly_report = RawArticle::with('category', 'website')
             ->where('status', 1)
-            ->whereMonth('published_date', Carbon::now()->month)
+            ->whereMonth('published_date', $month)
             ->get();
         //data input
         $report_array[] = array('UUID', 'Host', 'Myanmar Time', 'Myanmar Date', 'Title', 'Original Category', 'Lotaya Category', 'Reject', 'Reject Reason');
@@ -25,10 +26,10 @@ class SentArticlesExport implements FromCollection
             $report_array[] = array(
                 'UUID' => $data->uuid,
                 'Host' => $data->website->host,
-                'Myanmar Time' => $data->published_date,
-                'Myanmar Date' => date($data->published_date),
+                'Myanmar Time' => $data->publisheDate,
+                'Myanmar Date' => date($data->publishedDate),
                 'Title' => $data->title,
-                'Original Category' => $data->website->provider_category,
+                'Original Category' => $data->website->providerCategory,
                 'Lotaya Category' => $data->category->name,
                 'Reject' => 'FALSE',
                 'Reject Reason' => null,

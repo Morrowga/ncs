@@ -9,6 +9,10 @@ use App\Http\Controllers\Controller;
 
 class WebsiteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +23,9 @@ class WebsiteController extends Controller
         $search_name = request()->input('search_name');
 
         if ($search_name) {
-            $search_name_query = ['name', $search_name];
+            $search_name_query = ['title', $search_name];
         } else {
-            $search_name_query = ['name', '!=', NULL];
+            $search_name_query = ['title', '!=', NULL];
         }
 
         $websites = Website::where([
@@ -58,16 +62,17 @@ class WebsiteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|unique:websites|max:255',
+            'title' => 'required|unique:websites|max:255',
             'url' => 'required|unique:websites|max:255',
-            // 'host' => 'required',
-            'provider_category' => 'required|unique:websites|max:255',
+            'logo' => 'nullable',
+            'host' => 'required',
+            'providerCategory' => 'required|unique:websites|max:255',
         ]);
 
         $website = new Website;
-        $website->name = Str::lower($request->input('name'));
+        $website->title = Str::lower($request->input('title'));
         $website->url = Str::lower($request->input('url'));
-        $website->provider_category = Str::lower($request->input('provider_category'));
+        $website->providerCategory = Str::lower($request->input('providerCategory'));
         $website->host = $request->input('host');
         $website->save();
 
@@ -111,14 +116,14 @@ class WebsiteController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:255',
+            'title' => 'required|max:255',
             'url' => 'required|max:255',
         ]);
 
         $website = Website::find($id);
-        $website->name = Str::lower($request->input('name'));
+        $website->title = Str::lower($request->input('title'));
         $website->url = Str::lower($request->input('url'));
-        $website->provider_category = Str::lower($request->input('provider_category'));
+        $website->providerCategory = Str::lower($request->input('providerCategory'));
         $website->host = $request->input('host');
         $website->save();
 

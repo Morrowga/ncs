@@ -2,13 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Helper;
 use Illuminate\Console\Command;
-use App\Models\Articles\RawArticle;
+use DOMDocument;
+use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Link;
 use Carbon\Carbon;
 use Goutte\Client;
-use App\Models\Scrapes\Content;
-use DOMDocument;
+use App\Lib\Scraper;
+use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
+use function App\Helpers\logText;
+
 
 class LifestyleCron extends Command
 {
@@ -84,6 +89,7 @@ class LifestyleCron extends Command
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
                 $raw->category_id = $f['category_id'];
+                $raw->host = "lifestylemyanmar.com";
                 $raw->save();
 
                 $current_id = $raw->id;
@@ -99,7 +105,7 @@ class LifestyleCron extends Command
                             $img = $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = $img;
+                            $content->content_image = utf8_decode(urldecode($img));
                             $content->save();
                         }
                     } else {
@@ -130,5 +136,6 @@ class LifestyleCron extends Command
             }
         }
         Log::info("Lifestyle CronJob is Working");
+        $log = Helper::logText("LifestyleMyanmar Scraped the data");
     }
 }

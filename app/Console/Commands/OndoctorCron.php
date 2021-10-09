@@ -2,17 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Helper;
+use Illuminate\Console\Command;
+use DOMDocument;
 use App\Models\Scrapes\Content;
 use App\Models\Scrapes\Link;
 use Carbon\Carbon;
 use Goutte\Client;
-use App\Models\Articles\RawArticle;
 use App\Lib\Scraper;
-use Illuminate\Http\Request;
-use Illuminate\Console\Command;
-use DOMDocument;
-use App\Http\Controllers\Web_scraping\LinksController;
+use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
+use function App\Helpers\logText;
 
 class OndoctorCron extends Command
 {
@@ -72,7 +72,7 @@ class OndoctorCron extends Command
                         }
                         $content = new Content();
                         $content->article_id = $article->id;
-                        $content->content_image = $img;
+                        $content->content_image = utf8_decode(urldecode($img));;
                         $content->save();
                     } else {
                         $on_content = str_replace('p>', '', $on_content);
@@ -98,5 +98,6 @@ class OndoctorCron extends Command
             }
         }
         Log::info("Ondoctor CronJob is Working");
+        $log = Helper::logText("Ondoctor Scraped the data");
     }
 }

@@ -2,17 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Scrapes\Link;
-use App\Models\Scrapes\Content;
+use App\Helpers\Helper;
+use Illuminate\Console\Command;
 use DOMDocument;
+use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Link;
 use Carbon\Carbon;
 use Goutte\Client;
-use App\Models\Articles\RawArticle;
 use App\Lib\Scraper;
-use Illuminate\Console\Command;
+use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+
+use function App\Helpers\logText;
 
 class YoyarlayHealthCron extends Command
 {
@@ -56,6 +59,15 @@ class YoyarlayHealthCron extends Command
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
+                $content_feature = new Content;
+                $file_format = file_get_contents($article->image);
+                $filename = substr($article->image, strrpos($article->image, '/') + 1);
+                // $filename = str_replace('.jpg', '.png', $filename);
+                $locate = Storage::disk('public')->put($filename, $file_format);
+                $content_feature->article_id = $article->id;
+                $content_feature->content_image = $filename;
+                $content_feature->save();
+
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $yyl_content) {

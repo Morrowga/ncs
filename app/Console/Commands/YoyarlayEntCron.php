@@ -2,17 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Scrapes\Link;
-use App\Models\Scrapes\Content;
+use App\Helpers\Helper;
+use Illuminate\Console\Command;
 use DOMDocument;
+use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Link;
 use Carbon\Carbon;
 use Goutte\Client;
-use App\Models\Articles\RawArticle;
 use App\Lib\Scraper;
-use Illuminate\Console\Command;
+use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+
+use function App\Helpers\logText;
 
 class YoyarlayEntCron extends Command
 {
@@ -118,5 +121,6 @@ class YoyarlayEntCron extends Command
             }
         }
         Log::info("YoyarLay-Ent CronJob is Working");
+        $log = Helper::logText("Yoyar Entertainment Scraped the data");
     }
 }

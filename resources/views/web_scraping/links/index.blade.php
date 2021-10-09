@@ -69,7 +69,7 @@
                                 @forelse ($links as $link)
                                 <tr data-id="{{ $link->id }}" class="over">
                                     <td>{{ $link->id }}</td>
-                                    <td>{{ $link->website->name }} </td>
+                                    <td>{{ $link->website->title }} </td>
                                     <td><strong><span
                                                 class="label label-info">{{ $link->category->name }}</span></strong>
                                     </td>

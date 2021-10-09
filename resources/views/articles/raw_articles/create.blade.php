@@ -12,12 +12,12 @@
                 <input type="text" name="source_link" class="form-control rounded-0" placeholder="Source Link .."
                     id="source_link" required>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-4">
                 <label for="website_id"><strong>{{ __('Website') }}</strong></label>
                 <select name="website_id" class="form-control rounded-0 s2" id="website_id" required>
                     <option value="">{{ __('Choose Provider Website Name ..') }}</option>
                     @foreach($websites as $website)
-                    <option value="{{ $website->id }}">{{ $website->name }}</option>
+                    <option value="{{ $website->id }}">{{ $website->title }}</option>
                     @endforeach
                 </select>
             </div>
@@ -29,13 +29,13 @@
                 <input type="text" name="publishedDate" value="{{ date('Y-m-d H:i:s') }}"
                     class="form-control rounded-0 date-picker" placeholder="Published Date" id="publishedDate" required>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-4 ml-1">
                 <label for="category_id"><strong>{{ __('Category Name') }}</strong></label>
                 <select class="category-multiple form-control rounded-0 s2" name="category_id" id="category_id"
                     required>
                     <option value="" aria-readonly="">{{ __('Choose Category Name ..') }}</option>
                     @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }} ({{ $category->name_mm }})</option>
+                    <option value="{{ $category->id }}">{{ $category->name }} ({{ $category->nameMm }})</option>
                     @endforeach
                 </select>
             </div>

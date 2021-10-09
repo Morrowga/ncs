@@ -16,33 +16,63 @@
             <div class="form-group col-md-5">
                 <label for="website_id"><strong>{{ __('Website') }}</strong></label>
                 <select name="website_id" class="form-control rounded-0 s2" id="website_id" required>
-                    <option value="{{ $raws->website->id }}">{{ $raws->website->name}}</option>
-                    @foreach($websites as $website)
-                    <option value="{{ $website->id }}">{{ $website->name }}</option>
+                    @foreach ($websites as $website)
+                    <option value="{{$website->id}}" {{ $suggest_website == $website->id ? 'selected' : '' }}>
+                        {{ $website->title}}
+                    </option>
                     @endforeach
+                    {{-- <option value="{{ $raws->website->id }}">{{ $raws->website->title}}</option>
+                    @foreach($websites as $website)
+                    <option value="{{ $website->id }}">{{ $website->title }}</option>
+                    @endforeach --}}
                 </select>
+                <div class="form-row">
+                    @if (!empty($suggest_website))
+                    <p class="suggest_category">
+                        @foreach ((array)$suggest_website as $website)
+                        #{{$website}}
+                        @endforeach
+                    </p>
+                    @endif
+                </div>
             </div>
         </div>
-
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="publishedDate"><strong>{{ __('Pulished Date') }}</strong></label>
-                <input type="text" name="publishedDate" value="{{ $raws->published_date }}"
+                <input type="text" name="publishedDate" value="{{ $raws->publishedDate }}"
                     class="form-control rounded-0 date-picker" placeholder="Published Date" id="publishedDate" required>
             </div>
             <div class="form-group col-md-4 mr-1">
                 <label for="category_id"><strong>{{ __('Category Name') }}</strong></label>
                 <select class="category-multiple form-control rounded-0 s2" name="category_id" id="category_id"
                     required>
-                    <option value="{{$raws->category->id}}" aria-readonly="">
-                        {{ $raws->category->name}} ({{ $raws->category->name_mm }})
-                    </option>
-                    @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}
-                        ({{ $category->name_mm }})
+                    @foreach ($categories as $category)
+                    <option value="{{$category->id}}" {{ $suggest_category == $category->id-1 ? 'selected' : '' }}>
+                        {{ $category->name}} ({{ $category->nameMm }})
                     </option>
                     @endforeach
+
+                    {{-- @foreach($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}
+                    ({{ $category->nameMm }})
+                    </option>
+                    @endforeach --}}
                 </select>
+                <div class="form-row">
+                    @if (!empty($suggest_category))
+                    <p class="suggest_category">
+                        #{{$suggest_category}}
+                    </p>
+                    @endif
+                </div>
+                <div class="form-row">
+                    @if (!empty($suggest_indexing))
+                    <p class="suggest_category">
+                        #{{$suggest_indexing}}
+                    </p>
+                    @endif
+                </div>
             </div>
 
             {{-- tags --}}
@@ -51,18 +81,33 @@
                 <select style="width:417px;" class=" form-control rounded-0 s2s" name="tag[]" multiple id="tag"
                     required>
                     @foreach($tags as $tag)
-                    <option value="{{ $tag->id }}" @foreach($raws->tags as
-                        $taglist){{$taglist->pivot->tag_id == $tag->id ? 'selected': ''}} @endforeach> {{ $tag->name }}
+                    <option value="{{ $tag->id }}" @foreach($suggesting_tags as $sug_tag)
+                        {{$sug_tag == $tag->id ? 'selected': ''}} @endforeach>
+                        {{ $tag->nameMm }}
                     </option>
                     @endforeach
+                    {{-- @foreach($tags as $tag)
+                    <option value="{{ $tag->id }}" @foreach($raws->tags as
+                    $taglist){{$taglist->pivot->tag_id == $tag->id ? 'selected': ''}} @endforeach> {{ $tag->name }}
+                    </option>
+                    @endforeach --}}
                 </select>
             </div>
         </div>
         <div class="form-row">
             @if (!empty($suggesting_tags))
             <p class="suggest_tag">
-                @foreach ((array)$suggesting_tags as $key=>$value)
-                #{{$key}}({{$value}})
+                @foreach ((array)$suggesting_tags as $tags)
+                #{{$tags}}
+                @endforeach
+            </p>
+            @endif
+        </div>
+        <div class="form-row">
+            @if (!empty($indexing_tags))
+            <p class="suggest_tag">
+                @foreach ((array)$indexing_tags as $tags)
+                #{{$tags}}
                 @endforeach
             </p>
             @endif
@@ -83,7 +128,7 @@
             </div>
         </div>
         <div class="row justify-content-center my-4">
-            <a href="{{ route('raw_articles.index',$raws->id) }}"
+            <a href="{{ url()->previous() }}"
                 class="col-12 col-md-3 btn btn-outline-secondary btn-lg rounded-0 mr-md-2 mb-2 mb-md-0">Cancel</a>
             <button type="submit" class="col-12 col-md-3 btn btn-outline-success btn-lg rounded-0">Update
             </button>

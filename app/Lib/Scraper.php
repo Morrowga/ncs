@@ -138,7 +138,7 @@ class Scraper
 
                 $article->category_id = $data['category_id'][$k];
 
-                $article->published_date = Carbon::now();
+                $article->publishedDate = Carbon::now();
 
                 $article->website_id = $data['website_id'][$k];
 

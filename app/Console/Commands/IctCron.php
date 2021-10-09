@@ -2,15 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Helper;
 use Illuminate\Console\Command;
-use App\Link;
-use Goutte\Client;
-use Carbon\Carbon;
-use App\Lib\Scraper;
-use App\Models\Scrapes\Content;
-use App\Models\Articles\RawArticle;
 use DOMDocument;
+use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Link;
+use Carbon\Carbon;
+use Goutte\Client;
+use App\Lib\Scraper;
+use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
+use function App\Helpers\logText;
+
 
 class IctCron extends Command
 {
@@ -80,6 +83,7 @@ class IctCron extends Command
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
                 $store_data->image = "https://" . $ict_data['images']['lg'];
                 $store_data->source_link = $true_url;
+                $store_data->host = "ictdirectory.com.mm";
                 $store_data->save();
 
                 $content = new Content;
@@ -122,11 +126,19 @@ class IctCron extends Command
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            $image = "https://www.myanmaritdirectory.com/" . $image->getAttribute('src');
-                            $content = new Content();
-                            $content->article_id = $current_id;
-                            $content->content_image = $image;
-                            $content->save();
+                            if (strpos($ict_con, '/images')) {
+                                $image = "https://www.myanmaritdirectory.com/" . $image->getAttribute('src');
+                                $content = new Content();
+                                $content->article_id = $current_id;
+                                $content->content_image = utf8_decode(urldecode($image));
+                                $content->save();
+                            } else {
+                                $image = $image->getAttribute('src');
+                                $content = new Content();
+                                $content->article_id = $current_id;
+                                $content->content_image = $image;
+                                $content->save();
+                            }
                         }
                     } else {
                         foreach (explode('span>', $ict_con) as $con) {
@@ -134,6 +146,7 @@ class IctCron extends Command
                             $con = str_replace('colgrou', '', $con);
                             $con = str_replace('a>', '', $con);
                             $con = str_replace('p>', '', $con);
+                            $con = str_replace('em>', '', $con);
                             $con = str_replace('strong>', '', $con);
                             $con = str_replace('iframe>', '', $con);
                             foreach (explode('<br />', $con) as $con_br) {
@@ -149,5 +162,6 @@ class IctCron extends Command
             }
         }
         Log::info("ICT CronJob is Working");
+        $log = Helper::logText("ICT Scraped the data");
     }
 }

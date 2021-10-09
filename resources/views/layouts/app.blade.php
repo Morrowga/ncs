@@ -90,6 +90,10 @@
             color: blue;
         }
 
+        p.suggest_category {
+            color: green;
+        }
+
         /* responsive for mobile */
         @media (max-width: 700px) {
 
@@ -213,6 +217,9 @@
                             <span class="ml-3 item-text">{{ __('Raw Articles') }}</span>
                             <span
                                 class="badge badge-pill badge-primary increase-size  pt-1">{{ $count_raw_article }}</span>
+
+
+
                         </a>
                     </li>
                     <li class="nav-item w-100">
@@ -221,12 +228,23 @@
                             <span class="ml-3 item-text">{{ __('LoTaYa Articles') }}</span>
                             <span
                                 class="badge badge-pill badge-success increase-size text-white  pt-1">{{ $count_sent_lotaya }}</span>
+
+
+
                         </a>
                     </li>
                     <li class="nav-item w-100">
                         <a class="nav-link" href="{{ route('reject_articles.index') }}">
                             <i class="fe fe-layers fe-16"></i>
                             <span class="ml-3 item-text">{{ __('Reject Articles') }}</span>
+                            <span
+                                class="badge badge-pill badge-danger increase-size  pt-1">{{ $count_reject_article }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item w-100">
+                        <a class="nav-link" href="{{ route('laravellogs') }}">
+                            <i class="fe fe-layers fe-16"></i>
+                            <span class="ml-3 item-text">{{ __('Log') }}</span>
                             <span
                                 class="badge badge-pill badge-danger increase-size  pt-1">{{ $count_reject_article }}</span>
                         </a>
@@ -268,9 +286,9 @@
                         </a>
                     </li>
                     <li class="nav-item w-100">
-                        <a class="nav-link" href="{{ route('keyword.index') }}">
+                        <a class="nav-link" href="{{ route('tag.index') }}">
                             <i class="fe fe-list fe-16"></i>
-                            <span class="ml-3 item-text">{{ __('Keywords') }}</span>
+                            <span class="ml-3 item-text">{{ __('Tags') }}</span>
                         </a>
                     </li>
 
@@ -404,7 +422,7 @@
             $('.btn-apply').on('click', function () {
                 var link_id = $(this).parents("tr").attr("data-id");
                 var schema_id = $(this).siblings('select').val();
-                //    var token = $('input[name=_token]').val();
+                //    var token = $('input[name=_t.elementor-container .content-inneroken]').val();
 
                 $.ajaxSetup({
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },

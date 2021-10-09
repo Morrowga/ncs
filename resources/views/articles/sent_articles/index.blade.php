@@ -70,17 +70,17 @@
                                 <td>{{ $sent->id }}</td>
                                 <td>{{ $sent->uuid }}</td>
                                 <td>{{ Str::limit($sent->title, 80, '...')}}</td>
-                                <td>{{ $sent->published_date}}</td>
+                                <td>{{ $sent->publishedDate}}</td>
 
 
                                 <td>
-                                    {{-- <a href="{{route('sent_articles.show',$sent->id)}}"
-                                    class="btn btn-sm btn-outline-primary rounded-circle pd-2">
-                                    <i class="fe fe-eye fe-16"></i></a> --}}
-                                    {{-- <a href="{{ route('raw_articles.edit',$sent->id)}}"
-                                    class="btn btn-sm btn-outline-warning rounded-circle"><i
-                                        class="fe fe-edit fe-16"></i>
-                                    </a> --}}
+                                    <a href="{{route('raw_articles.show',$sent->id)}}"
+                                        class="btn btn-sm btn-outline-primary rounded-circle pd-2">
+                                        <i class="fe fe-eye fe-16"></i></a>
+                                    <a href="{{ route('raw_articles.edit',$sent->id)}}"
+                                        class="btn btn-sm btn-outline-warning rounded-circle"><i
+                                            class="fe fe-edit fe-16"></i>
+                                    </a>
                                     <a href="#delete-modal" data-toggle="modal"
                                         class="btn btn-sm btn-outline-danger rounded-circle"
                                         data-route="{{ route('raw_articles.destroy', $sent->id) }}"><i

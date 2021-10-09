@@ -10,11 +10,19 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Sheet;
 use App\Exports\SentArticlesExport;
-use App\Helpers\Helper;
 use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Website;
+use App\Models\Settings\Category;
+use App\Models\Settings\Tag;
+use App\Helpers\Helper;
+
 
 class SentArticleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -32,28 +40,28 @@ class SentArticleController extends Controller
         } elseif ($search_type == 3) {
             $searching = ['title', 'LIKE', "%$search_data%"];
         } elseif ($search_type == 4) {
-            $searching = ['published_date', date('Y-m-d H:i:s', strtotime($search_data))];
+            $searching = ['publishedDate', date('Y-m-d H:i:s', strtotime($search_data))];
         } else {
             $searching = ['id', '!=', NULL];
         }
 
         $sent_articles = RawArticle::with('category', 'website', 'tags')
             ->where([
-                ['status', 1],
+                ['sent_status', 1],
                 $searching
             ])
-            ->orderByDesc('created_at');
+            ->orderByDesc('publishedDate');
 
 
         $yearly_report = RawArticle::with('category', 'website')
-            ->where('status', 1)
+            ->where('sent_status', 1)
             ->select(
                 'id',
                 'title',
-                'published_date',
+                'publishedDate',
                 'created_at'
             )
-            ->whereYear('published_date', Carbon::now()->year)
+            ->whereYear('publishedDate', Carbon::now()->year)
             ->get();
         // dd($yearly_report);
 
@@ -96,6 +104,18 @@ class SentArticleController extends Controller
     public function show($id)
     {
         //
+        $raws = RawArticle::with('category', 'website', 'tags')->find($id);
+        $contents = Content::where('article_id', $raws->id)->get();
+        // $check_duplicate = Helper::checkDuplicate($id);
+        $blacklist = Helper::checkBlacklist($id);
+        $default = [
+            'title' => 'Raw Article Detail',
+            'raws' => $raws->find($id),
+            'blacklist' => $blacklist,
+            // 'check_duplicate' => $check_duplicate
+        ];
+        // dd($contents);
+        return view('articles.raw_articles.detail', $default)->with('contents', $contents);
     }
 
     /**
@@ -107,7 +127,20 @@ class SentArticleController extends Controller
     public function edit($id)
     {
         //
+        $raws = RawArticle::with('website', 'category', 'tags')->find($id);
+        $categories = Category::get();
+        $websites = Website::get();
+        $tags = Tag::get();
 
+        $contents = Content::where('article_id', $raws->id)->get();
+        $suggesting_tags = Helper::suggest_tags($id);
+
+        $default = [
+            'title' => 'Edit Raw Article',
+            'raws' => $raws,
+            // 'suggest' => $suggesting_tags
+        ];
+        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents', 'suggesting_tags'));
     }
 
     /**
@@ -135,17 +168,14 @@ class SentArticleController extends Controller
     // monthly report
     public function monthly(Request $request)
     {
-        // $monthly_report = RawArticle::with('category', 'website')
-        //     ->where('status', 1)
-        //     ->whereMonth('published_date', Carbon::now()->month)
-        //     ->paginate(10);
-        // dd($monthly_report);
 
-        $month = 9;
+
+        $month = 10;
         $monthly_report = RawArticle::with('category', 'website')
-            ->where('status', 1)
-            ->whereMonth('published_date', $month)
+            ->where('sent_status', 1)
+            ->whereMonth('created_at', $month)
             ->paginate(10);
+        // dd($monthly_report);
 
         return view('report.monthly', compact('monthly_report'))->with('i', (request()->input('page', 1) - 1) * 15);
     }

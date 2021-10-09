@@ -29,11 +29,11 @@
                                 @csrf
                                 @endif
                                 <div class="form-group row">
-                                    <label for="name" class="col-sm-3 col-form-label">{{ __('Website Name') }}</label>
+                                    <label for="title" class="col-sm-3 col-form-label">{{ __('Website Title') }}</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="name"
-                                            value="{{ (isset($website)) ? $website->name : '' }}" class="form-control"
-                                            id="name" placeholder="{{ __('Website Name') }} ..">
+                                        <input type="text" name="title"
+                                            value="{{ (isset($website)) ? $website->title : '' }}" class="form-control"
+                                            id="title" placeholder="{{ __('Website Title') }} ..">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -53,12 +53,12 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="provider_category"
+                                    <label for="providerCategory"
                                         class="col-sm-3 col-form-label">{{ __('Provider Category Name') }}</label>
                                     <div class="col-sm-9">
-                                        <input type="text" name="provider_category"
-                                            value="{{ (isset($website)) ? $website->provider_category : '' }}"
-                                            class="form-control" id="provider_category"
+                                        <input type="text" name="providerCategory"
+                                            value="{{ (isset($website)) ? $website->providerCategory : '' }}"
+                                            class="form-control" id="providerCategory"
                                             placeholder="{{ __('Provider Category Name') }} ..">
                                     </div>
                                 </div>

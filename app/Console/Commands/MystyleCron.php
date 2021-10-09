@@ -2,13 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Helper;
+use Illuminate\Console\Command;
 use DOMDocument;
+use App\Models\Scrapes\Content;
+use App\Models\Scrapes\Link;
 use Carbon\Carbon;
 use Goutte\Client;
+use App\Lib\Scraper;
 use App\Models\Articles\RawArticle;
-use App\Models\Scrapes\Content;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use function App\Helpers\logText;
+
 
 class MystyleCron extends Command
 {
@@ -82,6 +87,7 @@ class MystyleCron extends Command
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
                 $raw->category_id = $f['category_id'];
+                $raw->host = "mystylemyanmar.com";
                 $raw->save();
 
 
@@ -99,7 +105,7 @@ class MystyleCron extends Command
                             $img = $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = $img;
+                            $content->content_image = utf8_decode(urldecode($img));
                             $content->save();
                         }
                     } else {
@@ -108,6 +114,7 @@ class MystyleCron extends Command
                         $f_content = str_replace('a>', '', $f_content);
                         $f_content = str_replace('p>', '', $f_content);
                         $f_content = str_replace('iframe>', '', $f_content);
+                        $f_content = str_replace('div>', '', $f_content);
                         $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
                         $convert = html_entity_decode($f_content);
                         foreach (explode('strong>', $convert) as $con) {
@@ -129,5 +136,6 @@ class MystyleCron extends Command
             }
         }
         Log::info("Mystyle CronJob is Working");
+        $log = Helper::logText("MystyleMyanmar Scraped the data");
     }
 }

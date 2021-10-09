@@ -14,10 +14,11 @@ class CreateWebsitesTable extends Migration
     public function up()
     {
         Schema::create('websites', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->increments('id');
+            $table->string('title');
+            $table->longText('logo')->nullable();
+            $table->string('providerCategory')->nullable();
             $table->string('url');
-            $table->string('provider_category')->nullable();
             $table->string('host')->nullable();
             $table->timestamps();
         });

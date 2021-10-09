@@ -15,20 +15,53 @@
                 #{{$key}}({{$value}})
                 @endforeach
             </p>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUalja_K0J5ssmnO_cde83NMbgLuQT9dAXsg&usqp=CAU"
+                class="mb-3">
+            <hr>
+            @endif
+            @if (!empty($sensitive))
+            <h3>
+                Sensitive Keywords Found
+                <span class="badge badge-pill badge-danger increase-size  pt-1">{{ count($blacklist) }}</span>
+            </h3>
+            <p class="blacklist">
+                @foreach ($sensitive as $key=>$value)
+                #{{$key}}({{$value}})
+                @endforeach
+            </p>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
+                class="mb-5">
+            <hr>
             @endif
 
             <div class="row">
                 {{-- <a href=""><i class="fe fe-chevron-left"></i></a> --}}
                 <h1 class="page-title">{{ __($title) }}</h1>
             </div>
-
             <hr>
-
             <h3>{{ $raws->title}}</h3>
-            <p>{{ $raws->website->host}} | <i class="fe fe-calendar m-1" aria-hidden="true"></i>
-                {{$raws->published_date}}</p>
-            <br>
-            <div class="row">
+
+            <div class="card mt-3" style="border-radius: 10px;">
+                <div class="row ml-3 mt-3">
+                    <p>{{ $raws->website->host}} | <i class="fe fe-calendar ml-1" aria-hidden="true"></i>
+                        {{$raws->publishedDate}} | {{ $raws->category->name }}</p>
+                </div>
+
+                <div class="row ml-3">
+                    @foreach ( $raws->tags as $tag)
+                    <a type="button" class="btn btn-light" style="border:1px solid #ddd; border-radius:20px;
+                    " href="">#{{ $tag->nameMm}}</a>
+                    @endforeach
+                </div>
+
+                <div class="row my-3">
+                    <a href="{{ $raws->source_link}}" style="margin-left:140px;"
+                        class="btn btn-secondary mt-1 mb-2">ပင်မအကြောင်းအရာ</a>
+                </div>
+            </div>
+
+
+            <div class="row mt-3">
                 @if (!empty($raws->image_thumbnail))
                 <div class="col-md-8">
                     <img src="{{ $raws->image_thumbnail}}" alt="" width="100%" height="320" style="margin-left: 100px;">
@@ -57,17 +90,13 @@
             @endif
             @endforeach
 
-            @foreach ( $raws->tags as $tag)
-            <a type="button" class="btn btn-light" style="border:1px solid #ddd; border-radius:20px;"
-                href="{{ $tag->id}}">#{{ $tag->name}}</a>
-            @endforeach
 
         </div>
     </div>
 </div>
 <div class="col-2 mt-5 button">
     <div class="row">
-        <a href={{ route("raw_articles.index")}} class="btn btn-outline-secondary cancel rounded-0 mt-3"
+        <a href={{ url()->previous() }} class="btn btn-outline-secondary cancel rounded-0 mt-3"
             style="width:120px; height:40px;">Back</a>
     </div>
     <div class="row">

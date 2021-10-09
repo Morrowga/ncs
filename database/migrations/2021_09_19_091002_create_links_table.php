@@ -17,9 +17,24 @@ class CreateLinksTable extends Migration
             $table->increments('id');
             $table->longText('url');
             $table->string('main_filter_selector');   // this is the main filter selector used in the main filter() function
-            $table->unsignedInteger('website_id')->nullable();
-            $table->unsignedInteger('category_id')->nullable();
-            $table->unsignedInteger('item_schema_id')->nullable();
+            $table->bigInteger('website_id')->nullable()->unsigned();
+            $table->bigInteger('category_id')->nullable()->unsigned();
+            $table->bigInteger('item_schema_id')->nullable()->unsigned();
+            // $table->foreign('website_id')
+            //     ->references('id')
+            //     ->on('websites')
+            //     ->onUpdate('cascade')
+            //     ->onDelete('set null');
+            // $table->foreign('category_id')
+            //     ->references('id')
+            //     ->on('categories')
+            //     ->onUpdate('cascade')
+            //     ->onDelete('set null');
+            // $table->foreign('item_schema_id')
+            //     ->references('id')
+            //     ->on('item_schemas')
+            //     ->onUpdate('cascade')
+            //     ->onDelete('set null');
             $table->timestamps();
         });
     }

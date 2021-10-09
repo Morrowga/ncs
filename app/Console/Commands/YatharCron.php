@@ -14,14 +14,14 @@ use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
 use function App\Helpers\logText;
 
-class EdgeCron extends Command
+class YatharCron extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'edge:cron';
+    protected $signature = 'yathar:cron';
 
     /**
      * The console command description.
@@ -48,67 +48,62 @@ class EdgeCron extends Command
     public function handle()
     {
         $ch = curl_init();
-        $url = 'http://api.edge.com.mm/4/1/all';
+        $url = 'https://magazine.yathar.com/my/feed/';
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HEADER, 0);
 
         $data = curl_exec($ch);
 
         curl_close($ch);
-        $json_d = json_decode($data, true);
+        $e = json_encode($data);
+        $d = json_decode($e, true);
+        $d = str_replace('&', '&amp;', $d);
+        $rss = new DOMDocument();
+        $rss->loadXML($d);
 
-        // return $json_d;
-        foreach ($json_d as $edge_data) {
-            $checkExist = RawArticle::where('source_link', $edge_data['link'])->first();
+        $feed = array();
+
+        foreach ($rss->getElementsByTagName('item') as $node) {
+            // dd($node);
+            // echo $node->getElementsByTagName('title')->item(0)->nodeValue;
+            $item = array(
+                'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
+                'guid' => $node->getElementsByTagName('guid')->item(0)->nodeValue,
+                'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
+                'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
+                'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
+                'website_id' => '1',
+                'category_id' => '1'
+            );
+
+            array_push($feed, $item);
+        }
+        foreach ($feed as $f) {
+            $checkExist = RawArticle::where('source_link', $f['guid'])->first();
             if (!isset($checkExist->id)) {
-                $detail_count = str_word_count($edge_data['detail']);
-                $introtext_count = str_word_count($edge_data['introtext']);
-
-                $store_data = new RawArticle();
-                $store_data->title = $edge_data['title'];
-                if ($detail_count > $introtext_count) {
-                    $edge_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['detail']);
-                    $convert = html_entity_decode($edge_data['detail']);
-                    $store_data->content = $convert;
-                } else {
-                    $edge_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['introtext']);
-                    $convert = html_entity_decode($edge_data['introtext']);
-                    $store_data->content = $convert;
-                }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
-                $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
-                $store_data->image = $edge_data['images'];
-                $store_data->source_link = $edge_data['link'];
-                $store_data->host = "edge.com.mm";
-                $store_data->save();
-
-                $content = new Content;
-                $content->article_id = $store_data->id;
-                $content->content_image = $store_data->image;
-                $content->save();
-
-                if ($detail_count > $introtext_count) {
-                    $intro = $edge_data['introtext'];
-                    $intro = strip_tags($intro);
-                    $content_intro = Content::create([
-                        "article_id" => $store_data->id,
-                        "content_text" => $intro
-                    ]);
-                }
+                $raw = new RawArticle();
+                $raw->title = tounicode($f['title']);
+                $raw->source_link = $f['guid'];
+                $raw->publishedDate = date('Y-m-d H:i:s', strtotime($f['pubDate']));
+                $raw->content = tounicode($f['content']);
+                $raw->image = $f['image'];
+                $raw->website_id = $f['website_id'];
+                $raw->category_id = $f['category_id'];
+                // dd($raw);
+                $raw->save();
 
                 // $noti_url = 'https://fcm.googleapis.com/fcm/send';
                 // $noti_data = [
                 //     "to" => "/topics/general",
                 //     "data" => [
                 //         "body" => "Development Server",
-                //         "title" => $store_data->title,
-                //         "image" => $store_data->image,
+                //         "title" => $raw->title,
+                //         "image" => $raw->image,
                 //         "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                //         "notiId" => $store_data->id,
-                //         "date" => $store_data->publishedDate,
-                //         "provider" => "Edge"
+                //         "notiId" => $raw->id,
+                //         "date" => date('Y-m-d H:i:s', strtotime($raw->publishedDate)),
+                //         "provider" => "Yathar"
                 //     ],
                 //     "priority" => "high",
                 //     "android" => [
@@ -122,9 +117,9 @@ class EdgeCron extends Command
                 //     "webpush" => [
                 //         "headers" => [
                 //             "Urgency" => "high"
-                //             ]
                 //         ]
-                //     ];
+                //     ]
+                // ];
 
                 // $noti_json_array = json_encode($noti_data);
                 // $noti_headers = [
@@ -146,15 +141,14 @@ class EdgeCron extends Command
 
                 // curl_close($curl);
 
-                $current_id = $store_data->id;
+                $current_id = $raw->id;
 
-                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
-                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
-                foreach (explode('</', $store_data->content) as $edge_con) {
-                    if (stripos($edge_con, 'href') !== false) {
+
+                foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
+                    if (stripos($f_content, 'href') !== false) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
-                        $dom->loadHTML($edge_con);
+                        $dom->loadHTML($f_content);
                         libxml_clear_errors();
                         $links = $dom->getElementsByTagName('a');
                         foreach ($links as $link) {
@@ -165,38 +159,48 @@ class EdgeCron extends Command
                             $content->content_link = $a_text . "^" . $a_link;
                             $content->save();
                         }
-                    } elseif (stripos($edge_con, 'src') !== false) {
+                    } elseif (stripos($f_content, 'src')) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
-                        $dom->loadHTML($edge_con);
+                        $dom->loadHTML($f_content);
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            $image = "https://www.edge.com.mm/" . $image->getAttribute('src');
+                            $img = $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = utf8_decode(urldecode($image));
+                            $content->content_image = utf8_decode(urldecode($img));
                             $content->save();
                         }
                     } else {
-                        foreach (explode('>', $edge_con) as $con) {
-                            $con = strip_tags(str_replace("&nbsp;", " ", $con));
-                            $con = str_replace('a', '', $con);
-                            $con = str_replace('p', '', $con);
-                            $con = str_replace('strong', '', $con);
-                            $con = str_replace('span', '', $con);
-                            $con = str_replace('<br />', '', $con);
-                            $content = new Content;
-                            $content->article_id = $current_id;
-                            $content->content_text = $con;
-                            $content->save();
-                            $del = Content::where('content_text', "")->delete();
+                        $search_array = array(
+                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong'
+                        );
+                        $f_con = str_replace($search_array, '', $f_content);
+                        $f_content = trim(html_entity_decode($f_con), " \t\n\r\0\x0B\xC2\xA0");
+
+                        // $f_content = str_replace('>', '', $f_content);
+                        $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
+                        $convert = html_entity_decode($f_content);
+                        foreach (explode('strong>', $convert) as $con) {
+                            foreach (explode('ul>', $con) as $con_ul) {
+                                foreach (explode('li>', $con_ul) as $con_li) {
+                                    foreach (explode('br>', $con_li) as $br) {
+                                        $con_li = str_replace('<p><', '', $br);
+                                        $content = new Content();
+                                        $content->article_id = $current_id;
+                                        $content->content_text = $br;
+                                        $content->save();
+                                        $del = Content::where('content_text', "")->delete();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-        Log::info("Edge CronJob is Working");
-        $log = Helper::logText("Edge Scraped the data");
+        Log::info("Yathar CronJob is Working");
+        $log = Helper::logText("Yathar Scraped the data");
     }
 }

@@ -71,8 +71,8 @@ class WebhookController extends Controller
             $loot_free = [];
 
             foreach ($loot as $loot_once) {
-                $noti_url = 'https://fcm.googleapis.com/fcm/send';
-
+                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
+                $noti_url = 'https://noti';
                 $noti_data = [
                     "to" => "/topics/general",
                     "data" => [
@@ -140,7 +140,8 @@ class WebhookController extends Controller
             $loot_update = [];
 
             foreach ($loot_update_array as $loot_up) {
-                $noti_url = 'https://fcm.googleapis.com/fcm/send';
+                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
+                $noti_url = 'https://send';
 
                 $noti_data = [
                     "to" => "/topics/general",

@@ -14,14 +14,15 @@ use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
 use function App\Helpers\logText;
 
-class SayarCron extends Command
+
+class BuilderguideCron extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'sayar:cron';
+    protected $signature = 'builderguide:cron';
 
     /**
      * The console command description.
@@ -48,7 +49,7 @@ class SayarCron extends Command
     public function handle()
     {
         $ch = curl_init();
-        $url = 'http://api.sayar.com.mm/4/1/all';
+        $url = 'http://api.buildersguide.com.mm/4/0/all';
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -59,57 +60,65 @@ class SayarCron extends Command
         $json_d = json_decode($data, true);
 
         // return $json_d;
-
-        foreach ($json_d as $sayar_data) {
-            $sayar_link = "https://" . $sayar_data['link'];
-            $checkExist = RawArticle::where('source_link', $sayar_link)->first();
+        foreach ($json_d as $builder_guide_data) {
+            $checkExist = RawArticle::where('source_link', $builder_guide_data['link'])->first();
             if (!isset($checkExist->id)) {
-                $detail_count = str_word_count($sayar_data['detail']);
-                $introtext_count = str_word_count($sayar_data['introtext']);
+                $detail_count = str_word_count($builder_guide_data['detail']);
+                // return $detail_count;
 
+                $introtext_count = str_word_count($builder_guide_data['introtext']);
+                // return $introtext_count;
                 $store_data = new RawArticle();
-                $store_data->title = $sayar_data['title'];
+                $store_data->title = tounicode($builder_guide_data['title']);
                 if ($detail_count > $introtext_count) {
-                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['detail']);
-                    $convert = html_entity_decode($sayar_data['detail']);
-                    $store_data->content = tounicode($convert);
+                    $builder_guide_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $builder_guide_data['detail']);
+                    $convert = html_entity_decode($builder_guide_data['detail']);
+                    $store_data->content = $convert;
                 } else {
-                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['introtext']);
-                    $convert = html_entity_decode($sayar_data['introtext']);
-                    $store_data->content = tounicode($convert);
+                    $builder_guide_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $builder_guide_data['introtext']);
+                    $convert = html_entity_decode($builder_guide_data['introtext']);
+                    $store_data->content = $convert;
                 }
+
                 $store_data->website_id = '1';
                 $store_data->category_id = '1';
-                $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
-                $store_data->image = "https://" . $sayar_data['images']['lg'];
-                $store_data->source_link = $sayar_link;
-                $store_data->host = "sayar.com.mm";
+                $store_data->host = "buildersguide.com.mm";
+                $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($builder_guide_data['created']));
+                if (!empty($builder_guide_data['images'])) {
+                    $store_data->image = 'https://' . $builder_guide_data['images']['lg'];
+                }
+
+                $store_data->source_link = $builder_guide_data['link'];
+                // dd($store_data);
                 $store_data->save();
 
                 $content = new Content;
                 $content->article_id = $store_data->id;
-                $content->content_image = $store_data->image;
+                if (!empty($store_data->image_thumbnail)) {
+                    $content->content_image = $store_data->image_thumbnail;
+                } else {
+                    $content->content_image = $store_data->image;
+                }
                 $content->save();
 
                 if ($detail_count > $introtext_count) {
-                    $intro = $ict_data['introtext'];
+                    $intro = $builder_guide_data['introtext'];
                     $intro = strip_tags($intro);
                     $content_intro = Content::create([
                         "article_id" => $store_data->id,
-                        "content_text" => tounicode($intro)
+                        "content_text" => $intro
                     ]);
                 }
 
                 $current_id = $store_data->id;
 
-                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
                 // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
-                foreach (explode('</', $store_data->content) as $sayar_con) {
-                    if (stripos($sayar_con, 'href') !== false) {
-                        $sayar_con = str_replace('https://www.sayar.com.mm/images/Sayar_Guice_banner_design_2_2.jpg', '', $sayar_con);
+                foreach (explode('</', $store_data->content) as $builder_guide_content) {
+                    if (stripos($builder_guide_content, 'href') !== false) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
-                        $dom->loadHTML($sayar_con);
+                        $dom->loadHTML($builder_guide_content);
                         libxml_clear_errors();
                         $links = $dom->getElementsByTagName('a');
                         foreach ($links as $link) {
@@ -120,38 +129,39 @@ class SayarCron extends Command
                             $content->content_link = $a_text . "^" . $a_link;
                             $content->save();
                         }
-                    } elseif (stripos($sayar_con, 'src') !== false) {
+                    } elseif (stripos($builder_guide_content, 'src') !== false) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
-                        $dom->loadHTML($sayar_con);
+                        $dom->loadHTML($builder_guide_content);
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            $image = "https://www.sayar.com.mm/" . $image->getAttribute('src');
+                            $image = "https://www.buildersguide.com.mm/" . $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = utf8_decode(urldecode($image));
+                            $content->content_image = $image;
                             $content->save();
                         }
                     } else {
-                        foreach (explode('span>', $sayar_con) as $con) {
-                            $con = str_replace(array("\n", "\r", "\t"), '', $con);
+                        foreach (explode('>', $builder_guide_content) as $con) {
                             $con = strip_tags(str_replace("&nbsp;", " ", $con));
-                            $con = str_replace('p>', '', $con);
-                            $con = str_replace('strong>', '', $con);
+                            $con = str_replace('a', '', $con);
+                            $con = str_replace('p', '', $con);
+                            $con = str_replace('sn', '', $con);
+                            $con = str_replace('strong', '', $con);
+                            $con = str_replace('span', '', $con);
                             $con = str_replace('<br />', '', $con);
                             $content = new Content;
                             $content->article_id = $current_id;
-                            $content->content_text = tounicode($con);
+                            $content->content_text = $con;
                             $content->save();
-
                             $del = Content::where('content_text', "")->delete();
                         }
                     }
                 }
             }
         }
-        Log::info("Sayar CronJob is Working");
-        $log = Helper::logText("Sayar Scraped the data");
+        Log::info("BuilderGuide CronJob is Working");
+        $log = Helper::logText("BuilderGuide Scraped the data");
     }
 }
