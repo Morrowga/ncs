@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\BuilderguideCron;
 use App\Console\Commands\EdgeCron;
+use App\Console\Commands\FarmerCron;
 use App\Console\Commands\Healthcare;
 use App\Console\Commands\IctCron;
 use App\Console\Commands\MystyleCron;
@@ -39,7 +40,8 @@ class Kernel extends ConsoleKernel
         WeddingguideCron::class,
         YatharCron::class,
         ModaCron::class,
-        BuilderguideCron::class
+        BuilderguideCron::class,
+        FarmerCron::class
     ];
 
     /**
@@ -56,14 +58,15 @@ class Kernel extends ConsoleKernel
         $schedule->command('healthcare:cron')->cron('*/10 * * * *');
         $schedule->command('ondoctor:cron')->cron('*/10 * * * *');
         $schedule->command('ict:cron')->cron('*/30 * * * *');
-        // $schedule->command('yyl-health:cron')->cron('*/10 * * * *');
-        $schedule->command('yyl-ent:cron')->cron('*/10 * * * *');
+        // $schedule->command('yyl-health:cron')->cron('*/2 * * * *');
+        $schedule->command('yyl-ent:cron')->cron('*/2 * * * *');
         $schedule->command('edge:cron')->cron('*/10 * * * *');
         $schedule->command('sayar:cron')->cron('*/10 * * * *');
         $schedule->command('yathar:cron')->cron('*/10 * * * *');
         $schedule->command('weddingguide:cron')->cron('*/10 * * * *');
         $schedule->command('moda:cron')->cron('*/10 * * * *');
         $schedule->command('builderguide:cron')->cron('*/10 * * * *');
+        $schedule->command('farmer:cron')->cron('*/10 * * * *');
     }
 
     /**

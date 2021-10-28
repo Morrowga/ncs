@@ -168,8 +168,6 @@ class SentArticleController extends Controller
     // monthly report
     public function monthly(Request $request)
     {
-
-
         $month = 10;
         $monthly_report = RawArticle::with('category', 'website')
             ->where('sent_status', 1)

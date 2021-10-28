@@ -66,7 +66,7 @@ class EdgeCron extends Command
                 $introtext_count = str_word_count($edge_data['introtext']);
 
                 $store_data = new RawArticle();
-                $store_data->title = $edge_data['title'];
+                $store_data->title = tounicode($edge_data['title']);
                 if ($detail_count > $introtext_count) {
                     $edge_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['detail']);
                     $convert = html_entity_decode($edge_data['detail']);
@@ -76,8 +76,8 @@ class EdgeCron extends Command
                     $convert = html_entity_decode($edge_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '7';
+                $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
                 $store_data->image = $edge_data['images'];
                 $store_data->source_link = $edge_data['link'];
@@ -97,54 +97,6 @@ class EdgeCron extends Command
                         "content_text" => $intro
                     ]);
                 }
-
-                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-                // $noti_data = [
-                //     "to" => "/topics/general",
-                //     "data" => [
-                //         "body" => "Development Server",
-                //         "title" => $store_data->title,
-                //         "image" => $store_data->image,
-                //         "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                //         "notiId" => $store_data->id,
-                //         "date" => $store_data->publishedDate,
-                //         "provider" => "Edge"
-                //     ],
-                //     "priority" => "high",
-                //     "android" => [
-                //         "priority" => "high"
-                //     ],
-                //     "apns" => [
-                //         "headers" => [
-                //             "apns-priority" => "5"
-                //         ]
-                //     ],
-                //     "webpush" => [
-                //         "headers" => [
-                //             "Urgency" => "high"
-                //             ]
-                //         ]
-                //     ];
-
-                // $noti_json_array = json_encode($noti_data);
-                // $noti_headers = [
-                //     'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
-                //     'Accept: application/json',
-                //     'Content-Type: application/json',
-                // ];
-                // $curl = curl_init();
-                // curl_setopt($curl, CURLOPT_URL, $noti_url);
-                // curl_setopt($curl, CURLOPT_POST, 1);
-                // curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
-                // curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
-                // curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                // curl_setopt($curl, CURLOPT_HEADER, 1);
-                // curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-
-                // $response = curl_exec($curl);
-                // $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-                // curl_close($curl);
 
                 $current_id = $store_data->id;
 
@@ -194,6 +146,15 @@ class EdgeCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
         Log::info("Edge CronJob is Working");

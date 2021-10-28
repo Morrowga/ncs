@@ -17,4 +17,28 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('category/list', 'API\ArticleController@get_category_lists')->middleware('jwt');
+
+Route::post('send-new-articles/{id}', 'Notify\WebhookController@sendArticle')->name('send-test-webhook');
+
+// Route::get('send-update-trending', 'Notify\WebhookController@sendArticle')->name('send-test-webhook');
+
+
+Route::get('articles/{id}', 'API\ArticleController@index');
+Route::post('articles', 'API\ArticleController@get_all_articles');
+
+Route::get('categories', 'API\CategoryController@index');
+
+Route::get('related', 'API\ArticleController@get_related_artilces');
+
+Route::post('engagement', 'API\ArticleController@get_engagement_articles');
+Route::get('trend', 'API\ArticleController@get_trend');
+Route::get('trend?category_id=health', 'API\ArticleController@get_trend');
+
+Route::get('categories/list', 'API\CategoryController@index');
+
+Route::post('indexing', 'API\ArticleController@indexing');
+
+
+// Route::get('test-index', 'API\ArticleController@testingIndex');
+
+Route::get('transferData', 'API\ArticleController@transferData');

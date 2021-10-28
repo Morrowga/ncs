@@ -17,7 +17,7 @@
                 @endforeach
             </div>
             @endif
-            
+
             @if (session('error'))
             <div class="alert alert-danger rounded-0">
                 {{ session('error') }}
@@ -25,13 +25,15 @@
             @endif
 
             <div class="form-group">
-                <label for="username" class="sr-only">Username</label>
-                <input type="text" id="username" class="form-control form-control-lg" name="username" value="{{ old('username') }}" placeholder="Username .." autocomplete="username" autofocus="">
+                <label for="name" class="sr-only">User Name</label>
+                <input type="text" id="name" class="form-control form-control-lg" name="name" value="{{ old('name') }}"
+                    placeholder="username .." autocomplete="name" autofocus="">
             </div>
 
             <div class="form-group">
                 <label for="password" class="sr-only">Password</label>
-                <input type="password" id="password" class="form-control form-control-lg" name="password" placeholder="Password ..">
+                <input type="password" id="password" class="form-control form-control-lg" name="password"
+                    placeholder="Password ..">
             </div>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">Let me in</button>

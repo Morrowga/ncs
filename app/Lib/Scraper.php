@@ -4,13 +4,11 @@ namespace App\Lib;
 
 use App\Models\Articles\RawArticle;
 use Goutte\Client as GoutteClient;
-use App\Models\Scrapes\Website;
-use App\Models\Scrapes\Category;
+use App\Website;
+use App\Category;
 use Carbon\Carbon;
 use App\Models\Scrapes\Content;
 use DOMDocument;
-use App\Helpers\Helper;
-use Illuminate\Support\Str;
 
 /**
  * Class Scraper
@@ -126,9 +124,7 @@ class Scraper
 
                 $article = new RawArticle();
 
-                $article->uuid = Helper::uuid();
-
-                $article->title = $val;
+                $article->title = tounicode($val);
 
                 $article->content = isset($data['content'][$k]) ? $data['content'][$k] : "";
 
@@ -138,50 +134,13 @@ class Scraper
 
                 $article->category_id = $data['category_id'][$k];
 
-                $article->publishedDate = Carbon::now();
-
                 $article->website_id = $data['website_id'][$k];
 
+                $article->publishedDate = Carbon::now();
+
+                $article->host = $article->website->host;
+
                 $article->save();
-
-                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
-                $article->content = trim(str_replace('"', "'", $article->content));
-
-                foreach (explode('</p>', $article->content) as $on_content) {
-                    if (stripos($on_content, 'src')) {
-                        $on_content = str_replace('<p>', '', $on_content);
-                        $dom = new DOMDocument();
-                        libxml_use_internal_errors(true);
-                        $dom->loadHTML($on_content);
-                        libxml_clear_errors();
-                        $images = $dom->getElementsByTagName('img');
-                        foreach ($images as $image) {
-                            $img = $image->getAttribute('src');
-                        }
-                        $content = new Content();
-                        $content->article_id = $article->id;
-                        $content->content_image = $img;
-                        $content->save();
-                    } else {
-                        $on_content = str_replace('<p>', '', $on_content);
-                        foreach (explode('</strong>', $on_content) as $con) {
-                            $con = str_replace('<strong>', '', $con);
-                            foreach (explode('</ul>', $con) as $con_ul) {
-                                $con_ul = str_replace('<ul>', '', $con_ul);
-                                foreach (explode('</li>', $con_ul) as $con_li) {
-                                    $con_li = str_replace('<li>', '', $con_li);
-                                    $con_li = str_replace('<br>', '', $con_li);
-                                    $content = new Content();
-                                    $content->article_id = $article->id;
-                                    $content->content_text = $con_li;
-                                    $content->save();
-
-                                    $del = Content::where('content_text', "")->delete();
-                                }
-                            }
-                        }
-                    }
-                }
 
                 $this->savedItems++;
 
@@ -189,12 +148,30 @@ class Scraper
                 $noti_data = [
                     "to" => "/topics/general",
                     "data" => [
-                        "body" => date('h:i:s A', strtotime($article->publishedDate)) . "Prod",
-                        "title" => $article->website->title,
+                        "body" => "Development Server",
+                        "title" => $article->title,
                         "image" => $article->image,
-                        "sound" => "https://www.mboxdrive.com/hickory_dickory_dock-notification.mp3",
+                        "sound" => "https://www.mboxdrive.com/goalsound.mp3",
+                        "notiId" => $article->id,
+                        "date" => date('Y-m-d H:i:s', strtotime($article->publishedDate)),
+                        "provider" => $article->website->title
+                    ],
+                    "priority" => "high",
+                    "android" => [
+                        "priority" => "high"
+                    ],
+                    "apns" => [
+                        "headers" => [
+                            "apns-priority" => "5"
+                        ]
+                    ],
+                    "webpush" => [
+                        "headers" => [
+                            "Urgency" => "high"
+                        ]
                     ]
                 ];
+
                 $noti_json_array = json_encode($noti_data);
                 $noti_headers = [
                     'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',

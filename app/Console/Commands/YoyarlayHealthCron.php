@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-use function App\Helpers\logText;
 
 class YoyarlayHealthCron extends Command
 {
@@ -55,7 +54,7 @@ class YoyarlayHealthCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '37')->get();
+        $articles = RawArticle::where('website_id', '6')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -81,6 +80,7 @@ class YoyarlayHealthCron extends Command
                             $img = $image->getAttribute('src');
                             $contents = file_get_contents($img);
                             $name = substr($img, strrpos($img, '/') + 1);
+                            $name = str_replace('.jpg', '.png', $name);
                             $locate = Storage::disk('public')->put($name, $contents);
                             $content = new Content();
                             $content->article_id = $article->id;

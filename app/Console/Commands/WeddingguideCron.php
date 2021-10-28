@@ -64,7 +64,6 @@ class WeddingguideCron extends Command
             if (!isset($checkExist->id)) {
                 $detail_count = str_word_count($wedding_data['detail']);
                 $introtext_count = str_word_count($wedding_data['introtext']);
-
                 $store_data = new RawArticle();
                 $store_data->title = tounicode($wedding_data['title']);
                 if ($detail_count > $introtext_count) {
@@ -76,8 +75,8 @@ class WeddingguideCron extends Command
                     $convert = html_entity_decode($wedding_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '10';
+                // $store_data->category_id = '1';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($wedding_data['created']));
                 $store_data->image = 'https://' . $wedding_data['images']['lg'];
                 $store_data->host = "weddingguide.com.mm";
@@ -88,11 +87,7 @@ class WeddingguideCron extends Command
 
                 $content = new Content;
                 $content->article_id = $store_data->id;
-                if (!empty($store_data->image_thumbnail)) {
-                    $content->content_image = $store_data->thumbnailUrl;
-                } else {
-                    $content->content_image = $store_data->image;
-                }
+                $content->content_image = $store_data->image;
                 $content->save();
 
                 if ($detail_count > $introtext_count) {
@@ -103,54 +98,6 @@ class WeddingguideCron extends Command
                         "content_text" => $intro
                     ]);
                 }
-
-                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-                // $noti_data = [
-                //     "to" => "/topics/general",
-                //     "data" => [
-                //         "body" => "Development Server",
-                //         "title" => $store_data->title,
-                //         "image" => $store_data->image,
-                //         "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                //         "notiId" => $store_data->id,
-                //         "date" => date('Y-m-d H:i:s', strtotime($store_data->publishedDate)),
-                //         "provider" => "Wedding Guide"
-                //     ],
-                //     "priority" => "high",
-                //     "android" => [
-                //         "priority" => "high"
-                //     ],
-                //     "apns" => [
-                //         "headers" => [
-                //             "apns-priority" => "5"
-                //         ]
-                //     ],
-                //     "webpush" => [
-                //         "headers" => [
-                //             "Urgency" => "high"
-                //         ]
-                //     ]
-                // ];
-
-                // $noti_json_array = json_encode($noti_data);
-                // $noti_headers = [
-                //     'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
-                //     'Accept: application/json',
-                //     'Content-Type: application/json',
-                // ];
-                // $curl = curl_init();
-                // curl_setopt($curl, CURLOPT_URL, $noti_url);
-                // curl_setopt($curl, CURLOPT_POST, 1);
-                // curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
-                // curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
-                // curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                // curl_setopt($curl, CURLOPT_HEADER, 1);
-                // curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-
-                // $response = curl_exec($curl);
-                // $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-                // curl_close($curl);
 
                 $current_id = $store_data->id;
 
@@ -178,15 +125,16 @@ class WeddingguideCron extends Command
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            $image = "https://www.weddingguide.com/" . $image->getAttribute('src');
+                            $img = "https://www.weddingguide.com/" . $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = utf8_decode(urldecode($image));
+                            $content->content_image = utf8_decode(urldecode($img));
                             $content->save();
                         }
                     } else {
                         foreach (explode('>', $wedding_con) as $con) {
                             $con = strip_tags(str_replace("&nbsp;", " ", $con));
+                            $con = strip_tags(str_replace("&nbsp", " ", $con));
                             $con = str_replace('a', '', $con);
                             $con = str_replace('p', '', $con);
                             $con = str_replace('sn', '', $con);
@@ -201,6 +149,15 @@ class WeddingguideCron extends Command
                         }
                     }
                 }
+                // $article_cat = RawArticle::find($store_data->id);
+                // // dd($article_cat);
+                // $article_tag = RawArticle::find($article_cat->id);
+                // $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                // $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
         Log::info("Wedding Guide CronJob is Working");

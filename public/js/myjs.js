@@ -10,6 +10,18 @@ $(function() {
     $("#delete-modal").on("hide.bs.modal", function() {
         $('.delete-modal form').removeAttr('action')
     })
+    $("#send-modal").on("show.bs.modal", function(event) {
+        var route = $(event.relatedTarget).data('route')
+        $(this).find('.modal-body form').attr('action', route)
+    })
+    $("#duplicate-modal").on("show.bs.modal", function(event) {
+        var route = $(event.relatedTarget).data('route')
+        $(this).find('.modal-body form').attr('action', route)
+    })
+    $("#blacklist-modal").on("show.bs.modal", function(event) {
+        var route = $(event.relatedTarget).data('route')
+        $(this).find('.modal-body form').attr('action', route)
+    })
 })
 
 let myjs = function() {

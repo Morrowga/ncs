@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('User123!@#')
             ],
             [
-                'name' => 'myat ko',
+                'name' => 'myatko',
                 // 'username' => 'myatko',
                 'email' => 'myatkohein@htut.com',
                 'password' => Hash::make('Myatkohein11111')

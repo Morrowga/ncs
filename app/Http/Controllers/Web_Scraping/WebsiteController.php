@@ -64,7 +64,7 @@ class WebsiteController extends Controller
         $validated = $request->validate([
             'title' => 'required|unique:websites|max:255',
             'url' => 'required|unique:websites|max:255',
-            'logo' => 'nullable',
+            // 'logo' => 'nullable',
             'host' => 'required',
             'providerCategory' => 'required|unique:websites|max:255',
         ]);
@@ -72,6 +72,7 @@ class WebsiteController extends Controller
         $website = new Website;
         $website->title = Str::lower($request->input('title'));
         $website->url = Str::lower($request->input('url'));
+        $website->logo = $request->input('logo');
         $website->providerCategory = Str::lower($request->input('providerCategory'));
         $website->host = $request->input('host');
         $website->save();

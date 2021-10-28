@@ -40,20 +40,19 @@ class LoginController extends Controller
     }
 
     public function login(Request $request)
-    {   
+    {
         $input = $request->all();
-  
+
         $validated = $request->validate([
-            'username' => 'required',
+            'name' => 'required',
             'password' => 'required',
         ]);
-  
-        $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        if( auth()->attempt( [$fieldType => $input['username'], 'password' => $input['password']]) ) {
+
+        $fieldType = filter_var($request->name, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        if (auth()->attempt([$fieldType => $input['name'], 'password' => $input['password']])) {
             return redirect()->route('home');
         } else {
-            return redirect()->route('login')->with('error','Username Or Password Are Wrong.');
+            return redirect()->route('login')->with('error', 'Username Or Password Are Wrong.');
         }
-          
     }
 }

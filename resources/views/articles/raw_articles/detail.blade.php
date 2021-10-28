@@ -33,10 +33,19 @@
                 class="mb-5">
             <hr>
             @endif
-
+            {{-- @if (!empty($content_count))
+            <h3>{{$content_count}}</h3>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
+                class="mb-5">
+            @endif --}}
             <div class="row">
                 {{-- <a href=""><i class="fe fe-chevron-left"></i></a> --}}
+                @if ($raws->sent_status == 0)
                 <h1 class="page-title">{{ __($title) }}</h1>
+                @endif
+                @if ($raws->sent_status == 1)
+                <h1 class="page-title">Lotaya Article Detail</h1>
+                @endif
             </div>
             <hr>
             <h3>{{ $raws->title}}</h3>
@@ -44,7 +53,9 @@
             <div class="card mt-3" style="border-radius: 10px;">
                 <div class="row ml-3 mt-3">
                     <p>{{ $raws->website->host}} | <i class="fe fe-calendar ml-1" aria-hidden="true"></i>
-                        {{$raws->publishedDate}} | {{ $raws->category->name }}</p>
+                        {{$raws->publishedDate}} |</p>
+                    <span class="ml-2" style="color: red; font-size:15px;"> {{ $raws->category->name
+                        }}</span>
                 </div>
 
                 <div class="row ml-3">
@@ -62,15 +73,18 @@
 
 
             <div class="row mt-3">
-                @if (!empty($raws->image_thumbnail))
-                <div class="col-md-8">
-                    <img src="{{ $raws->image_thumbnail}}" alt="" width="100%" height="320" style="margin-left: 100px;">
-                </div>
-                @else
+                @if(!empty($raws->image))
+                {{-- {{dd($raws->image)}} --}}
                 <div class="col-md-8">
                     <img src="{{ $raws->image}}" alt="" width="100%" height="320" style="margin-left: 100px;">
                 </div>
+                @elseif (!empty($raws->image_thumbnail))
+                <div class="col-md-8">
+                    <img src="{{ $raws->image_thumbnail}}" alt="" width="100%" height="320" style="margin-left:
+                100px;">
+                </div>
                 @endif
+
             </div>
             <br>
             @foreach ($contents as $content)
@@ -80,8 +94,8 @@
             @endif
 
             @if ($content->content_image)
-            <div class="text-center">
-                <img src="{{ $content->content_image }}" alt="" class="img-thumbnail" width="50%" height="150">
+            <div class="text-center mb-2">
+                <img src="{{ $content->content_image }}" alt="" class="img" width="40%" height="170">
             </div>
             @endif
             @if($content->content_link)
@@ -100,34 +114,40 @@
             style="width:120px; height:40px;">Back</a>
     </div>
     <div class="row">
-        <a href="{{ route("raw_articles.edit",$raws->id)}}" class="btn btn-outline-warning edit rounded-0 mt-3 pt-2"
-            style="width:120px; height:40px;">Edit</a>
+        <a href="{{ route('raw_articles.edit',$raws->id)}}" class="btn btn-outline-warning edit rounded-0 mt-3
+            pt-2" style="width:120px; height:40px;">Edit</a>
     </div>
     <hr class="mr-5">
     <div class="row">
-        <form action="{{ route('raw_articles.sent_lotaya',$raws->id)}}" method="POST">
+        {{-- <form action="" method="POST">
             @method('PUT')
-            @csrf
-            <button class="btn btn-outline-primary send rounded-0 mt-3" style="width:120px; height:40px;" type="submit"
-                onclick="return alert('Are you sure to send for lotaya?');">Send</button>
-        </form>
+            @csrf --}}
+            <a href="#send-modal" data-toggle="modal" class="btn btn-outline-primary send rounded-0 mt-3"
+                style="width:120px; height:40px;" data-route="{{ route('send-test-webhook',$raws->id)}}">Send</a>
+
+            {{--
+        </form> --}}
     </div>
 
-    <div class="row">
-        <form action="{{ route('raw_articles.duplicate',$raws->id)}}" method="POST">
+    <div class=" row">
+        {{-- <form action="{{ route('raw_articles.duplicate',$raws->id)}}" method="POST">
             @method('PUT')
-            @csrf
-            <button class="btn btn-outline-warning duplicate rounded-0 mt-3" style="width:120px; height:40px;"
-                type="submit" onclick="return alert('Are you sure to duplicate article?');">Duplicate</button>
-        </form>
+            @csrf --}}
+            <a href="#duplicate-modal" data-toggle="modal" class="btn btn-outline-warning duplicate rounded-0 mt-3"
+                style="width:120px; height:40px;"
+                data-route="{{ route('raw_articles.duplicate',$raws->id)}}">Duplicate</a>
+            {{--
+        </form> --}}
     </div>
     <div class="row">
-        <form action="{{ route('raw_articles.blacklist',$raws->id)}}" method="POST">
+        {{-- <form action="{{ route('raw_articles.blacklist',$raws->id)}}" method="POST">
             @method('PUT')
-            @csrf
-            <button class="btn btn-outline-danger blacklist rounded-0 mt-3" style="width:120px; height:40px;"
-                type="submit" onclick="return alert('Are you sure to blacklist article?');">Blacklist</button>
-        </form>
+            @csrf --}}
+            <a href="#blacklist-modal" data-toggle="modal" class="btn btn-outline-danger blacklist rounded-0 mt-3"
+                style="width:120px; height:40px;" data-route="{{ route('raw_articles.blacklist',$raws->id)}}"
+                type="submit">Blacklist</a>
+            {{--
+        </form> --}}
     </div>
 
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Console\Commands;
 
 use App\Helpers\Helper;
@@ -13,6 +14,7 @@ use App\Lib\Scraper;
 use App\Models\Articles\RawArticle;
 use Illuminate\Support\Facades\Log;
 use function App\Helpers\logText;
+
 
 class SayarCron extends Command
 {
@@ -58,8 +60,6 @@ class SayarCron extends Command
         curl_close($ch);
         $json_d = json_decode($data, true);
 
-        // return $json_d;
-
         foreach ($json_d as $sayar_data) {
             $sayar_link = "https://" . $sayar_data['link'];
             $checkExist = RawArticle::where('source_link', $sayar_link)->first();
@@ -68,7 +68,7 @@ class SayarCron extends Command
                 $introtext_count = str_word_count($sayar_data['introtext']);
 
                 $store_data = new RawArticle();
-                $store_data->title = $sayar_data['title'];
+                $store_data->title = tounicode($sayar_data['title']);
                 if ($detail_count > $introtext_count) {
                     $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['detail']);
                     $convert = html_entity_decode($sayar_data['detail']);
@@ -78,8 +78,8 @@ class SayarCron extends Command
                     $convert = html_entity_decode($sayar_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '8';
+                $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
                 $store_data->image = "https://" . $sayar_data['images']['lg'];
                 $store_data->source_link = $sayar_link;
@@ -106,7 +106,6 @@ class SayarCron extends Command
                 // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
                 foreach (explode('</', $store_data->content) as $sayar_con) {
                     if (stripos($sayar_con, 'href') !== false) {
-                        $sayar_con = str_replace('https://www.sayar.com.mm/images/Sayar_Guice_banner_design_2_2.jpg', '', $sayar_con);
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
                         $dom->loadHTML($sayar_con);
@@ -149,6 +148,15 @@ class SayarCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
         Log::info("Sayar CronJob is Working");

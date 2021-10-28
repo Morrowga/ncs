@@ -9,8 +9,8 @@ class Website extends Model
     //
     protected $table = "websites";
 
-    // public function articles()
-    // {
-    //     return $this->hasMany('App\Models\Articles\RawArticle');
-    // }
+    public function articles()
+    {
+        return $this->hasMany('App\Models\Articles\RawArticle');
+    }
 }

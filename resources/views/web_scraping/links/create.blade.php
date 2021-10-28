@@ -49,7 +49,7 @@
             <a href="{{ route('links.index') }}"
                 class="col-12 col-md-3 btn btn-outline-secondary btn-lg rounded-0 mr-md-2 mb-2 mb-md-0">Cancel</a>
             <button type="submit" class="col-12 col-md-3 btn btn-outline-success btn-lg rounded-0">Create
-                Content</button>
+                Link</button>
         </div>
     </form>
 

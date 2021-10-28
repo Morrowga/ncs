@@ -68,7 +68,7 @@ class IctCron extends Command
                 $introtext_count = str_word_count($ict_data['introtext']);
 
                 $store_data = new RawArticle();
-                $store_data->title = $ict_data['title'];
+                $store_data->title = tounicode($ict_data['title']);
                 if ($detail_count > $introtext_count) {
                     $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $ict_data['detail']);
                     $convert = html_entity_decode($ict_data['detail']);
@@ -78,8 +78,8 @@ class IctCron extends Command
                     $convert = html_entity_decode($ict_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '5';
+                $store_data->category_id = '10';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
                 $store_data->image = "https://" . $ict_data['images']['lg'];
                 $store_data->source_link = $true_url;
@@ -145,6 +145,11 @@ class IctCron extends Command
                             $con = strip_tags(str_replace("&nbsp;", " ", $con), '<br>');
                             $con = str_replace('colgrou', '', $con);
                             $con = str_replace('a>', '', $con);
+                            $con = str_replace('tr>', '', $con);
+                            $con = str_replace('td>', '', $con);
+                            $con = str_replace('div>', '', $con);
+                            $con = str_replace('tbody>', '', $con);
+                            $con = str_replace('table>', '', $con);
                             $con = str_replace('p>', '', $con);
                             $con = str_replace('em>', '', $con);
                             $con = str_replace('strong>', '', $con);
@@ -159,6 +164,11 @@ class IctCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
         Log::info("ICT CronJob is Working");

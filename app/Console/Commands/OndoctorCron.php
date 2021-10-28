@@ -47,13 +47,14 @@ class OndoctorCron extends Command
      */
     public function handle()
     {
+        $advertisement = ['Similac-Mum', 'solmux-ads', 'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'kremil'];
 
         $link = Link::find(3);
         $scraper = new Scraper(new Client());
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '1')->get();
+        $articles = RawArticle::where('website_id', '3')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -72,7 +73,12 @@ class OndoctorCron extends Command
                         }
                         $content = new Content();
                         $content->article_id = $article->id;
-                        $content->content_image = utf8_decode(urldecode($img));;
+                        $content->content_image = utf8_decode(urldecode($img));
+                        foreach ($advertisement as $ads) {
+                            if (strstr($content->content_image, $ads)) {
+                                $content->content_image = "";
+                            }
+                        }
                         $content->save();
                     } else {
                         $on_content = str_replace('p>', '', $on_content);
@@ -95,6 +101,11 @@ class OndoctorCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
         Log::info("Ondoctor CronJob is Working");

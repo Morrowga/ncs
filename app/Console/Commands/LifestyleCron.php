@@ -51,7 +51,7 @@ class LifestyleCron extends Command
         $ch = curl_init();
         $url = 'https://lifestylemyanmar.com/category/lotaya/?feed=Lifestyle_Myanmar_RSS_Feed_for_Lotaya';
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
 
         $data = curl_exec($ch);
@@ -65,7 +65,6 @@ class LifestyleCron extends Command
         $rss->loadXML($d);
         $feed = array();
         foreach ($rss->getElementsByTagName('item') as $node) {
-
             $item = array(
                 'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
                 'guid' => $node->getElementsByTagName('guid')->item(0)->nodeValue,
@@ -73,22 +72,25 @@ class LifestyleCron extends Command
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
                 'website_id' => '1',
+                'providerCategory' => $node->getElementsByTagName('category')->item(0)->nodeValue,
                 'category_id' => '1'
             );
             array_push($feed, $item);
         }
 
+        //  return $feed;
+
         foreach ($feed as $f) {
             $checkExist = RawArticle::where('source_link', $f['guid'])->first();
             if (!isset($checkExist->id)) {
                 $raw = new RawArticle();
-                $raw->title = $f['title'];
+                $raw->title = tounicode($f['title']);
                 $raw->source_link = $f['guid'];
                 $raw->publishedDate = date('Y-m-d H:i:s', strtotime($f['pubDate']));
                 $raw->content = tounicode($f['content']);
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
-                $raw->category_id = $f['category_id'];
+                // $raw->category_id = $f['category_id'];
                 $raw->host = "lifestylemyanmar.com";
                 $raw->save();
 
@@ -133,6 +135,15 @@ class LifestyleCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($raw->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
             }
         }
         Log::info("Lifestyle CronJob is Working");

@@ -32,6 +32,7 @@
                                         <option value="2">UUID</option>
                                         <option value="3">Title</option>
                                         <option value="4">published Date</option>
+                                        <option value="5">Website ID</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-6 col-md-3">
@@ -61,7 +62,8 @@
                                     <th width="10%" class="text-center">UUID</th>
                                     <th width="30%">Title</th>
                                     <th width="10%">Website</th>
-                                    <th width="15%" class="text-center">Published DATE</th>
+                                    <th width="9%" class="text-center">Time Ago</th>
+                                    <th width="3%">status</th>
                                     <th width="12%" class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -73,11 +75,14 @@
                                     <td>{{ $raw->uuid }}</td>
                                     <td>{{ Str::limit($raw->title, 80, '...')}}</td>
                                     <td>{{ $raw->website->title}}</td>
-                                    <td>{{ $raw->publishedDate}}</td>
+                                    <td>{{ $raw->created_at->diffForHumans() }}</td>
+                                    @if ($raw->sent_status == '0')
+                                    <td><i class="fe fe-x-circle fe-16 ml-3" style="color:red"></i></td>
+                                    @endif
 
 
                                     <td>
-                                        <a href="{{route('raw_articles.show',$raw->id)}}"
+                                        <a href=" {{route('raw_articles.show',$raw->id)}}"
                                             class="btn btn-sm btn-outline-primary rounded-circle pd-2">
                                             <i class="fe fe-eye fe-16"></i></a>
                                         <a href="{{ route('raw_articles.edit',$raw->id)}}"

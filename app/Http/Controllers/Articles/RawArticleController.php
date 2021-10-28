@@ -31,20 +31,21 @@ class RawArticleController extends Controller
     {
         $search_type = request()->input('search_type'); // 1 = ID, 2 = UUID, 3 = Title, 4 = Pub:Date
         $search_data = request()->input('search_data');
-
+        $websites = Website::get();
         if ($search_type == 1) {
             $searching = ['id', $search_data];
         } elseif ($search_type == 2) {
             $searching = ['uuid', $search_data];
         } elseif ($search_type == 3) {
-            $searching = ['title', 'LIKE', "%$search_data%"];
+            $searching = ['title', 'LIKE', '%' . $search_data . '%'];
         } elseif ($search_type == 4) {
-            $searching = ['published_date', date('Y-m-d H:i:s', strtotime($search_data))];
+            $searching = ['publishedDate', '>=', date('Y-m-d H:i:s', strtotime($search_data))];
+        } elseif ($search_type == 5) {
+            $searching = ['website_id', $search_data];
         } else {
             $searching = ['id', '!=', NULL];
         }
         $categories = Category::get();
-        $websites = Website::get();
         $tags = Tag::get();
         $raw_articles = RawArticle::with('category', 'website', 'tags')
             ->where([
@@ -129,11 +130,14 @@ class RawArticleController extends Controller
         // $check_duplicate = Helper::checkDuplicate($id);
         $blacklist = Helper::checkBlacklist($id);
         $sensitive = Helper::sensitive_keywords($id);
+        // $content_count = Helper::no_content($id);
+
         $default = [
             'title' => 'Raw Article Detail',
             'raws' => $raws->find($id),
             'blacklist' => $blacklist,
-            'sensitive' => $sensitive
+            'sensitive' => $sensitive,
+            // 'content_count' => $content_count
             // 'check_duplicate' => $check_duplicate
         ];
         // dd($contents);
@@ -159,7 +163,7 @@ class RawArticleController extends Controller
         $suggest_category = Helper::suggest_category($id);
         $suggest_indexing = Helper::indexing_category($id);
         $suggest_website = Helper::suggest_website($id);
-        $indexing_tags = Helper::indexing_tags($id);
+        // $indexing_tags = Helper::indexing_tags($id);
         // $test =  Helper::categorywith_title($id);
 
 
@@ -168,7 +172,7 @@ class RawArticleController extends Controller
             'raws' => $raws,
             // 'suggest' => $suggesting_tags
         ];
-        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents', 'suggesting_tags', 'suggest_category', 'suggest_indexing', 'suggest_website', 'indexing_tags'));
+        return view('articles.raw_articles.edit', $default, compact('categories', 'websites', 'tags', 'contents', 'suggesting_tags', 'suggest_category', 'suggest_indexing', 'suggest_website'));
     }
 
     /**
@@ -249,17 +253,17 @@ class RawArticleController extends Controller
 
         return view('laravellog', compact('data', 'date'));
     }
-    public function activityLog(Request $request){
+    public function activityLog(Request $request)
+    {
         $search =  $request->input('q');
-        if($search!=""){
-            $logs = Log::where(function ($query) use ($search){
-                $query->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('created_at', 'like', '%'.$search.'%');
+        if ($search != "") {
+            $logs = Log::where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('created_at', 'like', '%' . $search . '%');
             })
-            ->paginate(10);
+                ->paginate(10);
             $logs->appends(['q' => $search]);
-        }
-        else{
+        } else {
             $startDate = Carbon::createFromFormat('d/m/Y', '01/10/2021');
             $endDate = Carbon::now();
             $logs = Log::orderBy('created_at', 'DESC')->whereBetween('created_at', [$startDate, $endDate])->paginate(10);

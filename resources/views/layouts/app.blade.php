@@ -18,7 +18,8 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     <!-- Styles -->
-    {{-- <link href="{{ asset('css/app.css') }}" rel="stylesheet"> --}}
+    {{--
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet"> --}}
     <link rel="stylesheet" href="{{ asset('web/css/simplebar.css') }}">
     <!-- Fonts CSS -->
     <link
@@ -41,9 +42,11 @@
     {{-- excel --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4/css/bootstrap.min.css" />
 
-    {{-- <link rel="stylesheet" href="{{ asset('web/css/app-dark.css') }}" id="darkTheme" disabled> --}}
+    {{--
+    <link rel="stylesheet" href="{{ asset('web/css/app-dark.css') }}" id="darkTheme" disabled> --}}
     {{-- jquery --}}
-    {{-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    {{--
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"> --}}
     <style>
         body {
@@ -215,8 +218,8 @@
                         <a class="nav-link" href="{{ route('raw_articles.index') }}">
                             <i class="fe fe-layers fe-16"></i>
                             <span class="ml-3 item-text">{{ __('Raw Articles') }}</span>
-                            <span
-                                class="badge badge-pill badge-primary increase-size  pt-1">{{ $count_raw_article }}</span>
+                            <span class="badge badge-pill badge-primary increase-size  pt-1">{{ $count_raw_article
+                                }}</span>
 
 
 
@@ -226,8 +229,8 @@
                         <a class="nav-link" href="{{ route('sent_articles.index') }}">
                             <i class="fe fe-layers fe-16"></i>
                             <span class="ml-3 item-text">{{ __('LoTaYa Articles') }}</span>
-                            <span
-                                class="badge badge-pill badge-success increase-size text-white  pt-1">{{ $count_sent_lotaya }}</span>
+                            <span class="badge badge-pill badge-success increase-size text-white  pt-1">{{
+                                $count_sent_lotaya }}</span>
 
 
 
@@ -237,8 +240,8 @@
                         <a class="nav-link" href="{{ route('reject_articles.index') }}">
                             <i class="fe fe-layers fe-16"></i>
                             <span class="ml-3 item-text">{{ __('Reject Articles') }}</span>
-                            <span
-                                class="badge badge-pill badge-danger increase-size  pt-1">{{ $count_reject_article }}</span>
+                            <span class="badge badge-pill badge-danger increase-size  pt-1">{{ $count_reject_article
+                                }}</span>
                         </a>
                     </li>
                     <li class="nav-item w-100">
@@ -309,9 +312,9 @@
                     </li>
                     {{-- <li class="nav-item w-100">
                         <a class="nav-link" href="{{ route('keyword.index') }}">
-                    <i class="fe fe-list fe-16"></i>
-                    <span class="ml-3 item-text">{{ __('Keywords') }}</span>
-                    </a>
+                            <i class="fe fe-list fe-16"></i>
+                            <span class="ml-3 item-text">{{ __('Keywords') }}</span>
+                        </a>
                     </li> --}}
                 </ul>
             </nav>
@@ -321,6 +324,44 @@
     <main role="main" class="main-content">
         <div class="container-fluid">
             <div class="row justify-content-center">
+                {{-- {{ date('Y-m-d', '1634107898') }} --}}
+                {{-- {{dd(
+                tounicode('၂၀၂၀-၂၀၂၁ ဘ႑ာႏွစ္အတြင္း ေက်ာက္မ်က္ ရတနာႏွင့္ အထည္ခ်ဳပ္ပစၥည္းမ်ား တင္ပို႔ႏိုင္ျခင္း မရွိဘဲ
+                ထိခိုက္မႈအမ်ားဆုံး
+                ျဖစ္ေသာ္လည္း လယ္ယာထြက္ကုန္မ်ားကို အဓိကထား ေစ်းကြက္ရရွိေအာင္ ပိုမိုေဆာင္ရြက္ေနေၾကာင္း စီးပြားေရးႏွင့္
+                ကူးသန္း ေရာင္း၀ယ္ေရး၀န္ႀကီးဌာန၊ ျမန္မာကုန္သြယ္မႈျမႇင့္တင္ေရးအဖြဲ႕ထံမွ သိရသည္။ ကိုဗစ္ဗိုင္းရပ္စ္
+                စတင္ကူးစက္ခ်ိန္
+                ကစ၍ ေက်ာက္မ်က္ရတနာျပပြဲမ်ား ျပဳလုပ္ႏိိုင္ျခင္းမရွိခဲ့ဘဲ ႏိိုင္ငံတကာ၏ ၀ယ္လိုအားလည္း မရွိခဲ့ေၾကာင္း
+                သိရသည္။
+                “ေက်ာက္မ်က္နဲ႔ အထည္ခ်ဳပ္က႑ကေတာ့ ထိခိုက္မႈအမ်ားဆုံးလို႔ ေျပာရမွာေပါ့။ လုံး၀ရပ္သြားတာ
+                တစ္ႏွစ္ရွိၿပီ။ဒါေၾကာင့္
+                ပို႔ကုန္က႑မွာ လယ္ယာထြက္ကုန္ကိုသာ အဓိကအားစိုက္ၿပီး ေစ်းကြက္ရရွိေအာင္ ေဆာင္ရြက္ရမဲ့သေဘာ ရွိပါတယ္”ဟု
+                ျမန္မာကုန္သြယ္မႈ ျမႇင့္တင္ေရးအဖြဲ႕ ဒုတိယၫႊန္ၾကားေရးမႉးခ်ဳပ္ ဦးမ်ဳိးသူက ျမန္မာေတာင္သူႀကီးမ်ားဂ်ာနယ္ကို
+                ေျပာသည္။
+                ေက်ာက္မ်က္ႏွင့္ ေက်ာက္စိမ္းကိုႏိိုင္ငံတကာသို႔ တင္ပို႔ေရာင္းခ်ႏိိုင္ျခင္း မရွိသည့္အျပင္ အဓိက၀ယ္လက္ျဖစ္ေသာ
+                တ႐ုတ္ႏိုင္ငံကလည္း ၀ယ္လိုအားမ်ားစြာက်ဆင္းခဲ့ေၾကာင္း သိရသည္။ ျမန္မာအထည္ခ်ဳပ္က႑တြင္ EU ႏိုင္ငံမ်ားကေပး
+                ေသာ အေကာက္ခြန္ကင္းလြတ္ခြင့္မ်ား ရရွိထားသျဖင့္ ကိုဗစ္ကာလမတိုင္ခင္က အလားအလာေကာင္းမ်ား ျဖစ္ေပၚခဲ့ေသာ္
+                လည္း ကိုဗစ္ - ၁၉ စတင္ကူးစက္လာခ်ိန္မွစ၍ ျမန္မာအထည္ခ်ဳပ္က႑တြင္ ထိခိုက္မႈမ်ားခဲ့ေၾကာင္း သိရသည္။
+
+                ကိုဗစ္ - ၁၉ ေၾကာင့္ အလုပ္လက္မဲ့ျဖစ္ခဲ့ရေသာ အထည္ခ်ဳပ္အလုပ္သမား ၁၃ç၀၀၀ နီးပါးအတြက္ ဥေရာပသမဂၢအေရးေပၚ
+                ရန္ပုံေငြျဖစ္သည့္ ျမန္ကူ (Myan Ku) ကတစ္ဆင့္ ယူ႐ိုငါးသန္း (ျမန္မာက်ပ္ေငြ ၇ ဒသမ ၉ ဘီလ်ံ) ကို
+                ကူညီေထာက္ပံ့ေပး
+                ခဲ့ေၾကာင္း သိရသည္။ အထည္ခ်ဳပ္လုပ္ငန္းက႑တြင္ ႏိုင္ငံတကာ၀ယ္လက္မ်ားထံမွ အ၀ယ္အမွာစာမ်ား ပယ္ဖ်က္ျခင္း၊
+                ၾကန႔္ၾကာျခင္း၊ ေလ်ာ့နည္းျခင္းမ်ား ရွိခဲ့သည့္အျပင္ စက္႐ုံအမ်ားစု ပိတ္သိမ္းရသည္မ်ားလည္းရွိေၾကာင္း သိရသည္။
+                EU
+                ႏိုင္ငံမ်ားသို႔ ဖရဲ၊ သခြား၊ေထာပတ္သီးမ်ား တင္ပို႔မႈမွာလည္း အေအးခန္း ကြန္တိန္နာအခက္အခဲေၾကာင့္
+                ေစာင့္ဆိုင္းေနရာမွ
+                လတ္တေလာ ႏိုင္ငံေရး အေျပာင္းအလဲမ်ားေၾကာင့္ ရပ္ဆိုင္းသြားေၾကာင္းႏွင့္ ပို႔ကုန္က႑ သေဘာတူညီမႈမ်ားလည္း မေရရာ
+                သည့္အေျခအေန ျဖစ္ေနေၾကာင္း သီးႏံွပို႔ကုန္သမားမ်ားထံမွ သိရသည္။
+
+                - ေရႊမန္း
+
+                ျမန္မာေတာင္သူႀကီးမ်ား ဂ်ာနယ္
+
+                အတြဲ(၂၉) အမွတ္(၄၃၅)၊ ေဖေဖာ္၀ါရီ ၂၂ - ၂၈၊ ၂၀၂၁ ခုႏွစ္
+
+                ')
+                )}} --}}
                 @yield('content')
             </div>
         </div>
@@ -346,16 +387,76 @@
             </div>
         </div>
     </div>
+    <!-- Send Modal -->
+    <div class="modal fade" id="send-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body send-modal text-center py-5">
+                    <h4>Are you sure to send?</h4>
+                    <br>
+                    <form method="POST">
+                        @csrf
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><i
+                                class="fe fe-x-circle fe-16 mr-2"></i> {{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-outline-success"><i class="fe fe-send fe-16 mr-2"></i>
+                            {{ __('Send') }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Duplicate Modal -->
+    <div class="modal fade" id="duplicate-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body duplicate-modal text-center py-5">
+                    <h4>Are you sure to duplicate?</h4>
+                    <br>
+                    <form method="POST">
+                        @csrf
+                        @method("PUT")
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><i
+                                class="fe fe-x-circle fe-16 mr-2"></i> {{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-outline-warning"><i
+                                class="fe fe-minus-circle fe-16 mr-2"></i>
+                            {{ __('Duplicate') }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Blacklist Modal -->
+    <div class="modal fade" id="blacklist-modal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body blacklist-modal text-center py-5">
+                    <h4>Are you sure to blacklist?</h4>
+                    <br>
+                    <form method="POST">
+                        @csrf
+                        @method("PUT")
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><i
+                                class="fe fe-x-circle fe-16 mr-2"></i> {{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-outline-danger"><i class="fe fe-trash-2 fe-16 mr-2"></i>
+                            {{ __('Blacklist') }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="{{ asset('web/js/jquery.min.js') }}"></script>
-    <script src='{{ asset('web/js/jquery.stickOnScroll.js') }}'></script>
+    <script src='{{ asset(' web/js/jquery.stickOnScroll.js') }}'></script>
     <script src="{{ asset('web/js/popper.min.js') }}"></script>
     <script src="{{ asset('web/js/moment.min.js') }}"></script>
     <script src="{{ asset('web/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('web/js/select2.min.js') }}"></script>
     <script src="{{ asset('web/js/simplebar.min.js') }}"></script>
-    <script src='{{ asset('web/js/daterangepicker.js') }}'></script>
+    <script src='{{ asset(' web/js/daterangepicker.js') }}'></script>
     <script src="{{ asset('web/js/tinycolor-min.js') }}"></script>
     <script src="{{ asset('web/js/config.js') }}"></script>
     <script src="{{ asset('web/js/summernote-bs4.min.js') }}"></script>

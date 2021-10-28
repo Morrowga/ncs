@@ -61,6 +61,7 @@ class BuilderguideCron extends Command
 
         // return $json_d;
         foreach ($json_d as $builder_guide_data) {
+            // dd($builder_guide_data);
             $checkExist = RawArticle::where('source_link', $builder_guide_data['link'])->first();
             if (!isset($checkExist->id)) {
                 $detail_count = str_word_count($builder_guide_data['detail']);
@@ -80,8 +81,8 @@ class BuilderguideCron extends Command
                     $store_data->content = $convert;
                 }
 
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '11';
+                // $store_data->category_id = '1';
                 $store_data->host = "buildersguide.com.mm";
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($builder_guide_data['created']));
                 if (!empty($builder_guide_data['images'])) {
@@ -159,6 +160,15 @@ class BuilderguideCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
             }
         }
         Log::info("BuilderGuide CronJob is Working");

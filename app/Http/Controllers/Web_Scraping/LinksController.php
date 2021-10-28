@@ -18,6 +18,7 @@ use App\Models\Articles\RawArticle;
 use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\TextUI\Help;
 
 class LinksController extends Controller
 {
@@ -210,6 +211,8 @@ class LinksController extends Controller
             return response()->json(['status' => 2, 'msg' => $scraper->status]);
         }
     }
+
+
     public function getCont()
     {
         $ch = curl_init();
@@ -254,7 +257,7 @@ class LinksController extends Controller
                 $raw->content = tounicode($f['content']);
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
-                $raw->category_id = $f['category_id'];
+                // $raw->category_id = $f['category_id'];
                 $raw->host = "lifestylemyanmar.com";
                 $raw->save();
 
@@ -299,6 +302,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($raw->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
             }
         }
     }
@@ -329,7 +341,7 @@ class LinksController extends Controller
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
                 'providerCategory' => $node->getElementsByTagName('category')->item(0)->nodeValue,
-                'website_id' => '1',
+                'website_id' => '2',
                 'category_id' => '1'
             );
             array_push($feed, $item);
@@ -344,7 +356,7 @@ class LinksController extends Controller
                 $raw->content = $f['content'];
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
-                $raw->category_id = $f['category_id'];
+                // $raw->category_id = $f['category_id'];
                 $raw->host = "mystylemyanmar.com";
                 $raw->save();
 
@@ -379,7 +391,7 @@ class LinksController extends Controller
                         foreach (explode('strong>', $convert) as $con) {
                             foreach (explode('ul>', $con) as $con_ul) {
                                 foreach (explode('li>', $con_ul) as $con_li) {
-                                    foreach (explode('br', $con_li) as $br) {
+                                    foreach (explode('br>', $con_li) as $br) {
                                         $con_li = str_replace('<p><', '', $br);
                                         $content = new Content();
                                         $content->article_id = $current_id;
@@ -392,6 +404,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($raw->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
             }
         }
     }
@@ -419,7 +440,7 @@ class LinksController extends Controller
                 $store_data->title = tounicode($d['title']);
                 $store_data->content = $convert;
                 $store_data->category_id = '8';
-                $store_data->website_id = '35';
+                $store_data->website_id = '4';
                 $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
                 $store_data->image = $d['image'];
                 $store_data->source_link = $d['posturl'];
@@ -453,6 +474,15 @@ class LinksController extends Controller
                         $del = Content::where('content_text', "")->delete();
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
     }
@@ -461,12 +491,14 @@ class LinksController extends Controller
 
     public function ondoctor()
     {
+        $advertisement = ['Similac-Mum', 'solmux-ads', 'Decolgen', 'decolgen', 'Milk-Thistle-Ads'];
+
         $link = Link::find(3);
         $scraper = new Scraper(new Client());
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '1')->get();
+        $articles = RawArticle::where('website_id', '3')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -486,6 +518,11 @@ class LinksController extends Controller
                         $content = new Content();
                         $content->article_id = $article->id;
                         $content->content_image = utf8_decode(urldecode($img));
+                        foreach ($advertisement as $ads) {
+                            if (strstr($content->content_image, $ads)) {
+                                $content->content_image = "";
+                            }
+                        }
                         $content->save();
                     } else {
                         $on_content = str_replace('p>', '', $on_content);
@@ -508,10 +545,14 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
-
 
     public function ict()
     {
@@ -545,8 +586,8 @@ class LinksController extends Controller
                     $convert = html_entity_decode($ict_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '5';
+                $store_data->category_id = '10';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
                 $store_data->image = "https://" . $ict_data['images']['lg'];
                 $store_data->source_link = $true_url;
@@ -631,6 +672,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
@@ -648,10 +694,6 @@ class LinksController extends Controller
 
         curl_close($ch);
         $json_d = json_decode($data, true);
-
-        return $json_d;
-
-        // return $json_d;
 
         foreach ($json_d as $sayar_data) {
             $sayar_link = "https://" . $sayar_data['link'];
@@ -671,8 +713,8 @@ class LinksController extends Controller
                     $convert = html_entity_decode($sayar_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '8';
+                $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
                 $store_data->image = "https://" . $sayar_data['images']['lg'];
                 $store_data->source_link = $sayar_link;
@@ -741,6 +783,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
     }
@@ -752,7 +803,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '38')->get();
+        $articles = RawArticle::where('website_id', '6')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -826,7 +877,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '37')->get();
+        $articles = RawArticle::where('website_id', '6')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -924,8 +975,8 @@ class LinksController extends Controller
                     $convert = html_entity_decode($edge_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '7';
+                $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
                 $store_data->image = $edge_data['images'];
                 $store_data->source_link = $edge_data['link'];
@@ -994,6 +1045,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
     }
@@ -1026,8 +1086,8 @@ class LinksController extends Controller
                 'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
-                'website_id' => '1',
-                'category_id' => '1'
+                'website_id' => '9',
+                'category_id' => '9'
             );
 
             array_push($feed, $item);
@@ -1041,8 +1101,8 @@ class LinksController extends Controller
                 $raw->publishedDate = date('Y-m-d H:i:s', strtotime($f['pubDate']));
                 $raw->content = tounicode($f['content']);
                 $raw->image = $f['image'];
-                $raw->website_id = $f['website_id'];
-                $raw->category_id = $f['category_id'];
+                // $raw->website_id = $f['website_id'];
+                // $raw->category_id = $f['category_id'];
                 $raw->host = "yathar.com";
                 // dd($raw);
                 $raw->save();
@@ -1108,6 +1168,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($raw->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
     }
@@ -1143,8 +1212,8 @@ class LinksController extends Controller
                     $convert = html_entity_decode($wedding_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '10';
+                // $store_data->category_id = '1';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($wedding_data['created']));
                 $store_data->image = 'https://' . $wedding_data['images']['lg'];
                 $store_data->host = "weddingguide.com.mm";
@@ -1193,10 +1262,10 @@ class LinksController extends Controller
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            $image = "https://www.weddingguide.com/" . $image->getAttribute('src');
+                            $img = "https://www.weddingguide.com/" . $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $current_id;
-                            $content->content_image = utf8_decode(urldecode($image));
+                            $content->content_image = utf8_decode(urldecode($img));
                             $content->save();
                         }
                     } else {
@@ -1217,6 +1286,15 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
             }
         }
     }
@@ -1224,12 +1302,13 @@ class LinksController extends Controller
 
     public function moda_celebrity()
     {
+        //moda-celebrity
         $link = Link::find(9);
         $scraper = new Scraper(new Client());
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '47')->get();
+        $articles = RawArticle::where('website_id', '13')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -1238,7 +1317,28 @@ class LinksController extends Controller
                 $content_feature->save();
 
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = preg_replace('#<span class="detail-category">(.*?)</span>#', '', $article->content);
+                $article->content = preg_replace('#<div class="col.s10.offset-s1.m12">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<h3 class="show-detail-title">(.*?)</h3>#', '', $article->content);
+                $article->content = preg_replace('#<p class="description">(.*?)</p>#', '', $article->content);
+                $article->content = preg_replace('#<div class="auther-img">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<p class="detail-author">(.*?)</p>#', '', $article->content);
+                $article->content = preg_replace('#<p class="detail-date">(.*?)</p>#', '', $article->content);
+                $article->content = preg_replace('#<div class="share-btn">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="tag-list">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="col.s12.m4.l3.right">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="index-category.col.s10.offset-s1">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="more-post-title.col.s10.offset-s1">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<hr class="for-mobile">(.*?)</hr>#', '', $article->content);
+                $article->content = preg_replace('#<div class="share-group">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="sidebar-post.col.s12.m12">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<div class="more-post-img">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<i class="material-icons">(.*?)</i>#', '', $article->content);
+                $article->content = preg_replace('#<div class="col.s12.link-hover">(.*?)</div>#', '', $article->content);
+
+
                 $article->content = trim(str_replace('"', "'", $article->content));
+                // return $article->content;
                 foreach (explode('</', $article->content) as $moda_cele_content) {
                     if (stripos($moda_cele_content, 'src')) {
                         $dom = new DOMDocument();
@@ -1250,11 +1350,27 @@ class LinksController extends Controller
                             $img = $image->getAttribute('src');
                             $content = new Content();
                             $content->article_id = $article->id;
-                            $content->content_image = "https://moda.com.mm/" . $img;
-                            $content->save();
+                            if (strstr($img, "https://")) {
+                                $content->content_image = $img;
+                                $content->save();
+
+                                $article->image = $content->content_image;
+                                $article->update();
+                            } else {
+                                $content->content_image = "https://moda.com.mm/" . $img;
+                                $content->save();
+                            }
                         }
                     } else {
+                        $moda_cele_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $moda_cele_content);
+                        $moda_cele_content = str_replace('i>', '', $moda_cele_content);
                         $moda_cele_content = str_replace('p>', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('strong', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('br>', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('div>', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('hr>', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('p>', '', $moda_cele_content);
+                        $moda_cele_content = str_replace('span', '', $moda_cele_content);
                         $moda_cele_content = str_replace('<', '', $moda_cele_content);
                         $moda_cele_content = str_replace('iframe', '', $moda_cele_content);
                         $convert = html_entity_decode($moda_cele_content);
@@ -1268,6 +1384,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
@@ -1279,7 +1400,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '45')->get();
+        $articles = RawArticle::where('website_id', '13')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -1323,6 +1444,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
@@ -1378,6 +1504,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
@@ -1433,6 +1564,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
@@ -1452,6 +1588,7 @@ class LinksController extends Controller
 
         // return $json_d;
         foreach ($json_d as $builder_guide_data) {
+            // dd($builder_guide_data);
             $checkExist = RawArticle::where('source_link', $builder_guide_data['link'])->first();
             if (!isset($checkExist->id)) {
                 $detail_count = str_word_count($builder_guide_data['detail']);
@@ -1471,8 +1608,8 @@ class LinksController extends Controller
                     $store_data->content = $convert;
                 }
 
-                $store_data->website_id = '1';
-                $store_data->category_id = '1';
+                $store_data->website_id = '11';
+                // $store_data->category_id = '1';
                 $store_data->host = "buildersguide.com.mm";
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($builder_guide_data['created']));
                 if (!empty($builder_guide_data['images'])) {
@@ -1547,6 +1684,245 @@ class LinksController extends Controller
                             $content->content_text = $con;
                             $content->save();
                             $del = Content::where('content_text', "")->delete();
+                        }
+                    }
+                }
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                $article_cat->save();
+            }
+        }
+    }
+    public function farmer_media()
+    {
+        $ch = curl_init();
+        $url = 'https://www.thefarmermedia.com/api/v1/news?token=ExzVdU3mvF2hzfGZKsfz';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+        foreach ($json_d as $j_d) {
+            foreach ($j_d as $d) {
+                foreach ($d as $farmer_data) {
+                    // dd($farmer_data);
+                    $checkExist = RawArticle::where('source_link', $farmer_data['url'])->first();
+
+                    if (!isset($checkExist->id)) {
+
+                        $store_data = new RawArticle();
+                        $store_data->title = tounicode($farmer_data['title']);
+                        $farmer_data['description'] = str_replace(array("\n", "\r", "\t"), '', $farmer_data['description']);
+                        $convert = html_entity_decode(tounicode($farmer_data['description']));
+                        $store_data->content = $convert;
+                        $store_data->website_id = '14';
+                        $store_data->category_id = '12';
+                        $store_data->host = "thefarmermedia.com";
+                        $store_data->publishedDate =  date('Y-m-d H:i:s', $farmer_data['post_date']);
+                        if (!empty($farmer_data['main_image_1'])) {
+                            $farmer_feature_image = $farmer_data['main_image_1'];
+                            if (stripos($farmer_feature_image, 'src') !== false) {
+                                $dom = new DOMDocument();
+                                libxml_use_internal_errors(true);
+                                $dom->loadHTML($farmer_feature_image);
+                                libxml_clear_errors();
+                                $images = $dom->getElementsByTagName('img');
+                                foreach ($images as $image) {
+                                    $image = $image->getAttribute('src');
+                                    $store_data->image = $image;
+                                }
+                            }
+                        }
+
+                        $store_data->source_link = $farmer_data['url'];
+                        // dd($store_data);
+                        $store_data->save();
+
+                        $current_id = $store_data->id;
+
+                        // $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                        // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                        foreach (explode('</', $store_data->content) as $farmer_content) {
+                            if (stripos($farmer_content, 'href') !== false) {
+                                $dom = new DOMDocument();
+                                libxml_use_internal_errors(true);
+                                $dom->loadHTML($farmer_content);
+                                libxml_clear_errors();
+                                $links = $dom->getElementsByTagName('a');
+                                foreach ($links as $link) {
+                                    $a_link = $link->getAttribute('href');
+                                    $a_text = utf8_decode($link->textContent);
+                                    $content = new Content();
+                                    $content->article_id = $current_id;
+                                    $content->content_link = $a_text . "^" . $a_link;
+                                    $content->save();
+                                }
+                            } elseif (stripos($farmer_content, 'src') !== false) {
+                                $dom = new DOMDocument();
+                                libxml_use_internal_errors(true);
+                                $dom->loadHTML($farmer_content);
+                                libxml_clear_errors();
+                                $images = $dom->getElementsByTagName('img');
+                                foreach ($images as $image) {
+                                    $image = "https://www.thefarmermedia.com/sites/thefarmermedia.com/" . $image->getAttribute('src');
+                                    $content = new Content();
+                                    $content->article_id = $current_id;
+                                    $content->content_image = $image;
+                                    $content->save();
+                                }
+                            } else {
+                                foreach (explode('>', $farmer_content) as $con) {
+                                    $con = strip_tags(str_replace("&nbsp;", " ", $con));
+                                    $con = str_replace('a', '', $con);
+                                    $con = str_replace('p', '', $con);
+                                    $con = str_replace('sn', '', $con);
+                                    $con = str_replace('strong', '', $con);
+                                    $con = str_replace('span', '', $con);
+                                    $con = str_replace('<br />', '', $con);
+                                    $content = new Content;
+                                    $content->article_id = $current_id;
+                                    $content->content_text = $con;
+                                    $content->save();
+                                    $del = Content::where('content_text', "")->delete();
+                                }
+                            }
+                        }
+                        $article_cat = RawArticle::find($store_data->id);
+                        // dd($article_cat);
+                        $article_tag = RawArticle::find($article_cat->id);
+                        $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                        $article_tag->save();
+                    }
+                }
+            }
+        }
+    }
+    public function automobile()
+    {
+        $ch = curl_init();
+        $url = 'http://api.automobiledirectory.com.mm/4/0/all';
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        $data = curl_exec($ch);
+
+        curl_close($ch);
+        $json_d = json_decode($data, true);
+
+        // return $json_d;
+        foreach ($json_d as $automobile_data) {
+            $true_url = "https://" . $automobile_data['link'];
+            $checkExist = RawArticle::where('source_link', $true_url)->first();
+            if (!isset($checkExist->id)) {
+                $detail_count = str_word_count($automobile_data['detail']);
+                $introtext_count = str_word_count($automobile_data['introtext']);
+
+                $store_data = new RawArticle();
+                $store_data->title = tounicode($automobile_data['title']);
+                if ($detail_count > $introtext_count) {
+                    $automobile_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $automobile_data['detail']);
+                    $convert = html_entity_decode($automobile_data['detail']);
+                    $store_data->content = tounicode($convert);
+                } else {
+                    $automobile_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $automobile_data['introtext']);
+                    $convert = html_entity_decode($automobile_data['introtext']);
+                    $store_data->content = tounicode($convert);
+                }
+                $store_data->website_id = '15';
+                $store_data->category_id = '10';
+                $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($automobile_data['created']));
+                $store_data->image = "https://" . $automobile_data['images']['lg'];
+                $store_data->source_link = $true_url;
+                $store_data->host = "automobiledirectory.com";
+                $store_data->save();
+
+                $content = new Content;
+                $content->article_id = $store_data->id;
+                $content->content_image = $store_data->image;
+                $content->save();
+
+                if ($detail_count > $introtext_count) {
+                    $intro = $automobile_data['introtext'];
+                    $intro = strip_tags($intro);
+                    $content_intro = Content::create([
+                        "article_id" => $store_data->id,
+                        "content_text" => $intro
+                    ]);
+                }
+
+                $current_id = $store_data->id;
+
+                $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                foreach (explode('</', $store_data->content) as $automobile_con) {
+                    if (stripos($automobile_con, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($automobile_con);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $current_id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($automobile_con, 'src') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($automobile_con);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            if (strpos($automobile_con, '/images')) {
+                                $img = $image->getAttribute('src');
+                                $content = new Content();
+                                $content->article_id = $current_id;
+                                $content->content_image =  "https://www.automobiledirectory.com.mm/" . utf8_decode(urldecode($img));
+                                $content->save();
+                            } else {
+                                $img = $image->getAttribute('src');
+                                $content = new Content();
+                                $content->article_id = $current_id;
+                                $content->content_image =  "https://www.automobiledirectory.com.mm/" . utf8_decode(urldecode($img));
+                                $content->save();
+                            }
+                        }
+                    } else {
+                        foreach (explode('span>', $automobile_con) as $con) {
+                            $con = strip_tags(str_replace("&nbsp;", " ", $con), '<br>');
+                            $con = str_replace('colgrou', '', $con);
+                            $con = str_replace('a>', '', $con);
+                            $con = str_replace('tr>', '', $con);
+                            $con = str_replace('td>', '', $con);
+                            $con = str_replace('div>', '', $con);
+                            $con = str_replace('tbody>', '', $con);
+                            $con = str_replace('table>', '', $con);
+                            $con = str_replace('p>', '', $con);
+                            $con = str_replace('em>', '', $con);
+                            $con = str_replace('strong>', '', $con);
+                            $con = str_replace('iframe>', '', $con);
+                            foreach (explode('<br />', $con) as $con_br) {
+                                $content = new Content;
+                                $content->article_id = $current_id;
+                                $content->content_text = $con_br;
+                                $content->save();
+                                $del = Content::where('content_text', "")->delete();
+                            }
                         }
                     }
                 }

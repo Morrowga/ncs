@@ -73,8 +73,8 @@ class YatharCron extends Command
                 'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
-                'website_id' => '1',
-                'category_id' => '1'
+                'website_id' => '9',
+                'category_id' => '9'
             );
 
             array_push($feed, $item);
@@ -90,59 +90,16 @@ class YatharCron extends Command
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
                 $raw->category_id = $f['category_id'];
+                $raw->host = "yathar.com";
                 // dd($raw);
                 $raw->save();
 
-                // $noti_url = 'https://fcm.googleapis.com/fcm/send';
-                // $noti_data = [
-                //     "to" => "/topics/general",
-                //     "data" => [
-                //         "body" => "Development Server",
-                //         "title" => $raw->title,
-                //         "image" => $raw->image,
-                //         "sound" => "https://www.mboxdrive.com/goalsound.mp3",
-                //         "notiId" => $raw->id,
-                //         "date" => date('Y-m-d H:i:s', strtotime($raw->publishedDate)),
-                //         "provider" => "Yathar"
-                //     ],
-                //     "priority" => "high",
-                //     "android" => [
-                //         "priority" => "high"
-                //     ],
-                //     "apns" => [
-                //         "headers" => [
-                //             "apns-priority" => "5"
-                //         ]
-                //     ],
-                //     "webpush" => [
-                //         "headers" => [
-                //             "Urgency" => "high"
-                //         ]
-                //     ]
-                // ];
-
-                // $noti_json_array = json_encode($noti_data);
-                // $noti_headers = [
-                //     'Authorization: key=AAAAp8NVqeM:APA91bGPWMiGoNRavsQTyJSeY-79eovG1CxbW8SOx4Qm9dXgtSXzfnsJC090HjJzIujGKLNLWeGTnc0jZM_mfDle0vtYYhYDT7L-nzWUQzwa6G711s5KnWZHRuIy6ISkeQBcJv4w2FG2',
-                //     'Accept: application/json',
-                //     'Content-Type: application/json',
-                // ];
-                // $curl = curl_init();
-                // curl_setopt($curl, CURLOPT_URL, $noti_url);
-                // curl_setopt($curl, CURLOPT_POST, 1);
-                // curl_setopt($curl, CURLOPT_POSTFIELDS, $noti_json_array);
-                // curl_setopt($curl, CURLOPT_HTTPHEADER, $noti_headers);
-                // curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                // curl_setopt($curl, CURLOPT_HEADER, 1);
-                // curl_setopt($curl, CURLOPT_TIMEOUT, 30);
-
-                // $response = curl_exec($curl);
-                // $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-                // curl_close($curl);
-
                 $current_id = $raw->id;
 
+                $content_feature = new Content;
+                $content_feature->article_id = $current_id;
+                $content_feature->content_image = $raw->image;
+                $content_feature->save();
 
                 foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
                     if (stripos($f_content, 'href') !== false) {
@@ -174,7 +131,7 @@ class YatharCron extends Command
                         }
                     } else {
                         $search_array = array(
-                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong'
+                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong', '>'
                         );
                         $f_con = str_replace($search_array, '', $f_content);
                         $f_content = trim(html_entity_decode($f_con), " \t\n\r\0\x0B\xC2\xA0");
@@ -198,6 +155,15 @@ class YatharCron extends Command
                         }
                     }
                 }
+                $article_cat = RawArticle::find($raw->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
+                // $article_cat->save();
             }
         }
         Log::info("Yathar CronJob is Working");

@@ -53,6 +53,14 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
+                                    <label for="logo" class="col-sm-3 col-form-label">{{ __('Logo') }}</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="logo"
+                                            value="{{ (isset($website)) ? $website->logo : '' }}" class="form-control"
+                                            id="logo" placeholder="{{ __('Logo Name') }} ..">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
                                     <label for="providerCategory"
                                         class="col-sm-3 col-form-label">{{ __('Provider Category Name') }}</label>
                                     <div class="col-sm-9">
