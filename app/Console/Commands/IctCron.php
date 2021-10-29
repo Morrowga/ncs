@@ -146,6 +146,8 @@ class IctCron extends Command
                             $con = str_replace('colgrou', '', $con);
                             $con = str_replace('a>', '', $con);
                             $con = str_replace('tr>', '', $con);
+                            $con = str_replace('ul>', '', $con);
+                            $con = str_replace('li>', '', $con);
                             $con = str_replace('td>', '', $con);
                             $con = str_replace('div>', '', $con);
                             $con = str_replace('tbody>', '', $con);
