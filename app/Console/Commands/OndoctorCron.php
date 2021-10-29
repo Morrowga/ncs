@@ -54,7 +54,7 @@ class OndoctorCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '3')->get();
+        $articles = RawArticle::where('website_id', '32')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {

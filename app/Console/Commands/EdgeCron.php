@@ -76,7 +76,7 @@ class EdgeCron extends Command
                     $convert = html_entity_decode($edge_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '7';
+                $store_data->website_id = '39';
                 $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
                 $store_data->image = $edge_data['images'];

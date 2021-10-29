@@ -71,7 +71,7 @@ class MystyleCron extends Command
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
                 'providerCategory' => $node->getElementsByTagName('category')->item(0)->nodeValue,
-                'website_id' => '2',
+                'website_id' => '24',
                 'category_id' => '1'
             );
             array_push($feed, $item);

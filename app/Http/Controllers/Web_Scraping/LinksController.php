@@ -341,7 +341,7 @@ class LinksController extends Controller
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
                 'providerCategory' => $node->getElementsByTagName('category')->item(0)->nodeValue,
-                'website_id' => '2',
+                'website_id' => '24',
                 'category_id' => '1'
             );
             array_push($feed, $item);
@@ -440,7 +440,7 @@ class LinksController extends Controller
                 $store_data->title = tounicode($d['title']);
                 $store_data->content = $convert;
                 $store_data->category_id = '8';
-                $store_data->website_id = '4';
+                $store_data->website_id = '35';
                 $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
                 $store_data->image = $d['image'];
                 $store_data->source_link = $d['posturl'];
@@ -498,7 +498,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '3')->get();
+        $articles = RawArticle::where('website_id', '32')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -586,7 +586,7 @@ class LinksController extends Controller
                     $convert = html_entity_decode($ict_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '5';
+                $store_data->website_id = '34';
                 $store_data->category_id = '10';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
                 $store_data->image = "https://" . $ict_data['images']['lg'];
@@ -713,7 +713,7 @@ class LinksController extends Controller
                     $convert = html_entity_decode($sayar_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
-                $store_data->website_id = '8';
+                $store_data->website_id = '40';
                 $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
                 $store_data->image = "https://" . $sayar_data['images']['lg'];
@@ -803,7 +803,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '6')->get();
+        $articles = RawArticle::where('website_id', '38')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -877,7 +877,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '6')->get();
+        $articles = RawArticle::where('website_id', '37')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -975,7 +975,7 @@ class LinksController extends Controller
                     $convert = html_entity_decode($edge_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '7';
+                $store_data->website_id = '39';
                 $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($edge_data['created_date']));
                 $store_data->image = $edge_data['images'];
@@ -1086,7 +1086,7 @@ class LinksController extends Controller
                 'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
-                'website_id' => '9',
+                'website_id' => '43',
                 'category_id' => '9'
             );
 
@@ -1212,7 +1212,7 @@ class LinksController extends Controller
                     $convert = html_entity_decode($wedding_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '10';
+                $store_data->website_id = '42';
                 // $store_data->category_id = '1';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($wedding_data['created']));
                 $store_data->image = 'https://' . $wedding_data['images']['lg'];
@@ -1308,7 +1308,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '47')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -1400,7 +1400,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '45')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -1520,7 +1520,7 @@ class LinksController extends Controller
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '7')->get();
+        $articles = RawArticle::where('website_id', '44')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -1608,7 +1608,7 @@ class LinksController extends Controller
                     $store_data->content = $convert;
                 }
 
-                $store_data->website_id = '11';
+                $store_data->website_id = '48';
                 // $store_data->category_id = '1';
                 $store_data->host = "buildersguide.com.mm";
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($builder_guide_data['created']));
@@ -1726,7 +1726,7 @@ class LinksController extends Controller
                         $farmer_data['description'] = str_replace(array("\n", "\r", "\t"), '', $farmer_data['description']);
                         $convert = html_entity_decode(tounicode($farmer_data['description']));
                         $store_data->content = $convert;
-                        $store_data->website_id = '14';
+                        $store_data->website_id = '49';
                         $store_data->category_id = '12';
                         $store_data->host = "thefarmermedia.com";
                         $store_data->publishedDate =  date('Y-m-d H:i:s', $farmer_data['post_date']);
@@ -1840,7 +1840,7 @@ class LinksController extends Controller
                     $convert = html_entity_decode($automobile_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
-                $store_data->website_id = '15';
+                $store_data->website_id = '50';
                 $store_data->category_id = '10';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($automobile_data['created']));
                 $store_data->image = "https://" . $automobile_data['images']['lg'];

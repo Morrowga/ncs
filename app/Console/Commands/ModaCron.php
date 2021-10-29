@@ -54,7 +54,7 @@ class ModaCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '47')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -144,7 +144,7 @@ class ModaCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '45')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -233,7 +233,7 @@ class ModaCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '46')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
@@ -320,7 +320,7 @@ class ModaCron extends Command
 
         $scraper->handle($link);
 
-        $articles = RawArticle::where('website_id', '13')->get();
+        $articles = RawArticle::where('website_id', '44')->get();
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {

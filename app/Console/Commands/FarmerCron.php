@@ -72,7 +72,7 @@ class FarmerCron extends Command
                         $farmer_data['description'] = str_replace(array("\n", "\r", "\t"), '', $farmer_data['description']);
                         $convert = html_entity_decode(tounicode($farmer_data['description']));
                         $store_data->content = $convert;
-                        $store_data->website_id = '14';
+                        $store_data->website_id = '49';
                         $store_data->category_id = '12';
                         $store_data->host = "thefarmermedia.com";
                         $store_data->publishedDate =  date('Y-m-d H:i:s', $farmer_data['post_date']);

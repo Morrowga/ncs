@@ -78,7 +78,7 @@ class IctCron extends Command
                     $convert = html_entity_decode($ict_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '5';
+                $store_data->website_id = '34';
                 $store_data->category_id = '10';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($ict_data['created']));
                 $store_data->image = "https://" . $ict_data['images']['lg'];

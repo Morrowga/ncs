@@ -81,7 +81,7 @@ class BuilderguideCron extends Command
                     $store_data->content = $convert;
                 }
 
-                $store_data->website_id = '11';
+                $store_data->website_id = '48';
                 // $store_data->category_id = '1';
                 $store_data->host = "buildersguide.com.mm";
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($builder_guide_data['created']));

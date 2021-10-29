@@ -73,7 +73,7 @@ class YatharCron extends Command
                 'pubDate' => $node->getElementsByTagName('pubDate')->item(0)->nodeValue,
                 'content' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
                 'image' => $node->getElementsByTagName('url')->item(0)->nodeValue,
-                'website_id' => '9',
+                'website_id' => '43',
                 'category_id' => '9'
             );
 

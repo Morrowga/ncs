@@ -78,7 +78,7 @@ class SayarCron extends Command
                     $convert = html_entity_decode($sayar_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
-                $store_data->website_id = '8';
+                $store_data->website_id = '40';
                 $store_data->category_id = '13';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($sayar_data['created']));
                 $store_data->image = "https://" . $sayar_data['images']['lg'];

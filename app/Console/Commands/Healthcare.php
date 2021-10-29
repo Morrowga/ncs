@@ -59,7 +59,7 @@ class Healthcare extends Command
                 $store_data->title = $d['title'];
                 $store_data->content = $d['content'];
                 $store_data->category_id = '8';
-                $store_data->website_id = '4';
+                $store_data->website_id = '35';
                 $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
                 $store_data->image = $d['image'];
                 $store_data->host = "healthcare.com.mm";

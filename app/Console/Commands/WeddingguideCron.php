@@ -75,7 +75,7 @@ class WeddingguideCron extends Command
                     $convert = html_entity_decode($wedding_data['introtext']);
                     $store_data->content = $convert;
                 }
-                $store_data->website_id = '10';
+                $store_data->website_id = '42';
                 // $store_data->category_id = '1';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime($wedding_data['created']));
                 $store_data->image = 'https://' . $wedding_data['images']['lg'];
