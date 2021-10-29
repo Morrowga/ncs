@@ -33,11 +33,11 @@
                 class="mb-5">
             <hr>
             @endif
-            {{-- @if (!empty($content_count))
+            @if (!empty($content_count))
             <h3>{{$content_count}}</h3>
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
                 class="mb-5">
-            @endif --}}
+            @endif
             <div class="row">
                 {{-- <a href=""><i class="fe fe-chevron-left"></i></a> --}}
                 @if ($raws->sent_status == 0)

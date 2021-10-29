@@ -46,7 +46,7 @@ class Helper
             'UNITED NATIONS', 'ကုလသမဂ္ဂ', 'ပုဒ်မ-၅၀၅(က)', 'ပုဒ်မ-၅၀၅(ခ)', 'ပုဒ်မ-၅၉(ဃ)', 'အာဆီယံ', 'အရှေ့တောင်အာရှနိုင်ငံများအသင်း', 'ASEAN', 'asean', 'Asean', 'ထိန်းသိမ်းခံ',
             'ဖဒရယ်', 'Federal', 'federal', 'နိုင်ငံရေးသမား', 'အမျိုးသားဒီမိုကရေစီအဖွဲ့ချုပ်', 'NLD', 'National League for Democracy', 'NationalLeagueforDemocracy', 'NATIONALLEAUGEFORDEMOCRACY', 'NATIONAL LEAGUE FOR DEMOCRACY',
             'nationalleaguedemocracy', 'natioanl league democracy', 'ဗုံး', 'ဗုံးပေါက်ကွဲ', 'ဗုံးခွဲတိုက်ခိုက်ခံရ', 'Boycott', 'ဒေါက်တာဆာဆာ', 'စစ်ကျွန်ပညာရေး', 'ဒေါက်တာဇော်ဝေစိုး', 'အာဏာသိမ်း', 'အာဏာထိမ်း',
-            'အာဏာရှင်', 'အာဏာရူး', 'နိုင်ငံရေး အကျဉ်းသား', 'နွေဦးတော်လှန်ရေး', 'တရားဥပဒေ စိုးမိုးမှု', 'ဆူပူအောင်လှုံဆော်မှု', 'ဒလန်', 'ကျောင်းသားသမဂ္ဂ', 'လက်နက်', 'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်'
+            'အာဏာရှင်', 'အာဏာရူး', 'နိုင်ငံရေး အကျဉ်းသား', 'နွေဦးတော်လှန်ရေး', 'တရားဥပဒေ စိုးမိုးမှု', 'ဆူပူအောင်လှုံဆော်မှု', 'ဒလန်', 'ကျောင်းသားသမဂ္ဂ', 'လက်နက်', 'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်', 'Wave Money', 'wave money',
         );
         $blist = [];
         $raws = RawArticle::find($id);

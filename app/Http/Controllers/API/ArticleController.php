@@ -35,6 +35,8 @@ class ArticleController extends Controller
                 $raw_article->image = $index_data['imageUrl'];
                 $raw_article->title = $index_data['title'];
                 $raw_article->host = $index_data['host'];
+                $raw_article->website_id = '3';
+                $raw_article->category_id = '1';
                 $raw_article->content = $index_data['content'];
                 $raw_article->publishedDate = date('Y-m-d H:i:s', strtotime($index_data['publishedDate']));
                 $raw_article->save();
@@ -106,9 +108,9 @@ class ArticleController extends Controller
                     }
                 }
                 $article_cat = RawArticle::find($raw_article->id);
-                $article_cat->category_id =  Helper::indexing_category($article_cat->id);
-                $article_cat->website_id = '3';
-                $article_cat->save();
+                // $article_cat->category_id =  Helper::indexing_category($article_cat->id);
+                // $article_cat->website_id = '3';
+                // $article_cat->save();
 
                 $article_tag = RawArticle::find($article_cat->id);
                 $article_tag->tags()->sync((array)Helper::indexing_tags($article_tag->id));
