@@ -34,7 +34,7 @@ class ArticleController extends Controller
                 $raw_article->source_link = $index_data['url'];
                 $raw_article->image = $index_data['imageUrl'];
                 $raw_article->title = $index_data['title'];
-                $raw_article->host = "lotaya.mpt.com.mm";
+                $raw_article->host = $index_data['host'];
                 $raw_article->content = $index_data['content'];
                 $raw_article->publishedDate = date('Y-m-d H:i:s', strtotime($index_data['publishedDate']));
                 $raw_article->save();
