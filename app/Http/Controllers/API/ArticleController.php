@@ -511,7 +511,7 @@ class ArticleController extends Controller
         // by category name
         $category_name = request()->input('category_id');
         if ($category_name) {
-            $category_id = Category::where('name', $category_name)->first()->id;
+            $category_id = Category::where('id_name', $category_name)->first()->id;
 
             $articles_one = DB::table('raw_articles')
                 ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
