@@ -18,11 +18,11 @@ class WebhookController extends Controller
         $article = RawArticle::with('category', 'tags', 'website')->where('id', $id)->first();
         if ($article) {
             if ($article->sent_status == 1) {
-                $new_uuid = null;
+                $new_uuid = [];
                 $updated_uuid = $article->uuid;
             } else {
                 $new_uuid = $article->uuid;
-                $updated_uuid = null;
+                $updated_uuid = [];
             }
         }
 
