@@ -56,7 +56,7 @@ class ArticleController extends Controller
                             array_push($get_data_array, $remove_p);
                         } elseif (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
                             $dom = new DOMDocument;
-                            $dom->loadHTML($remove_p);
+                            @$dom->loadHTML($remove_p);
                             $link_counts = $dom->getElementsByTagName('a');
                             foreach ($link_counts as $lc) {
                                 $link_href = $lc->getAttribute('href');
@@ -68,7 +68,7 @@ class ArticleController extends Controller
                             array_push($get_data_array, $remove_p . '^' . $link_href);
                         } elseif (strpos($remove_p, 'src') !== false) { // ========================= find img, take src and remove img
                             $dom = new DOMDocument;
-                            $dom->loadHTML($remove_p);
+                            @$dom->loadHTML($remove_p);
                             $img_counts = $dom->getElementsByTagName('img');
                             foreach ($img_counts as $ic) {
                                 $img_src = $ic->getAttribute('src');
