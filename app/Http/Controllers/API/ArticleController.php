@@ -275,8 +275,9 @@ class ArticleController extends Controller
                                 array_push($content_array, $content_data_text);
                             }
                             if ($content['content_image'] != null) {
-                                $hots = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
-                                if ($hots) {
+
+                                // $hosts = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
+                                if ($article->host == 'yoyarlay.com') {
                                     $content_data_image = [
                                         "key" => "image",
                                         "value" => "http://139.59.110.228/storage/" . $content['content_image']
