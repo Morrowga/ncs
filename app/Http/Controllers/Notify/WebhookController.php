@@ -26,9 +26,7 @@ class WebhookController extends Controller
             }
         }
 
-        // $url = 'https://devcms.mpt.com.mm/api/news/new_articles';
-        $url = "https://webhook.site/f15595a5-cf21-4ede-bd71-672cd7a278ff";
-
+        $url = 'https://devcms.mpt.com.mm/api/news/new_articles';
         $data = [
             'new' => $new_uuid,
             'update' => $updated_uuid

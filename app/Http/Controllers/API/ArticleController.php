@@ -466,9 +466,7 @@ class ArticleController extends Controller
             $result['success'] = true;
             $result['message'] = 'Eagagement data successfully updated.';
 
-            // $url = 'https://devcms.mpt.com.mm/api/news/update_order';
-            $url = "https://webhook.site/f15595a5-cf21-4ede-bd71-672cd7a278ff";
-
+            $url = 'https://devcms.mpt.com.mm/api/news/update_order';
             $data = [
                 "type" =>  "score_update"
             ];
