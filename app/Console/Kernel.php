@@ -53,13 +53,13 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('mystyle:cron')->cron('*/10 * * * *');
+        $schedule->command('mystyle:cron')->cron('*/3 * * * *');
         $schedule->command('lifestyle:cron')->cron('*/10 * * * *');
         $schedule->command('healthcare:cron')->cron('*/10 * * * *');
         $schedule->command('ondoctor:cron')->cron('*/10 * * * *');
         $schedule->command('ict:cron')->cron('*/30 * * * *');
         // $schedule->command('yyl-health:cron')->cron('*/2 * * * *');
-        $schedule->command('yyl-ent:cron')->cron('*/2 * * * *');
+        $schedule->command('yyl-ent:cron')->cron('*/10 * * * *');
         $schedule->command('edge:cron')->cron('*/10 * * * *');
         $schedule->command('sayar:cron')->cron('*/10 * * * *');
         $schedule->command('yathar:cron')->cron('*/10 * * * *');
