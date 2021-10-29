@@ -19,9 +19,9 @@ class WebhookController extends Controller
         if ($article) {
             if ($article->sent_status == 1) {
                 $new_uuid = [];
-                $updated_uuid = $article->uuid;
+                $updated_uuid[] = $article->uuid;
             } else {
-                $new_uuid = $article->uuid;
+                $new_uuid[] = $article->uuid;
                 $updated_uuid = [];
             }
         }
