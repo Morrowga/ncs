@@ -109,12 +109,16 @@ class MystyleCron extends Command
                         }
                     } else {
                         $f_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $f_content);
+                        $f_content = str_replace('<br>', '', $f_content);
+                        $f_content = str_replace('<br/>', '', $f_content);
+                        $f_content = str_replace('br />', '', $f_content);
                         $f_content = str_replace('/>', '', $f_content);
                         $f_content = str_replace('<', '', $f_content);
                         $f_content = str_replace('a>', '', $f_content);
                         $f_content = str_replace('p>', '', $f_content);
                         $f_content = str_replace('iframe>', '', $f_content);
                         $f_content = str_replace('div>', '', $f_content);
+                        $f_content = str_replace('br>', '', $f_content);
                         $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
                         $f_content = str_replace('b>', '', $f_content);
                         $convert = html_entity_decode($f_content);

@@ -379,6 +379,9 @@ class LinksController extends Controller
                         }
                     } else {
                         $f_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $f_content);
+                        $f_content = str_replace('<br>', '', $f_content);
+                        $f_content = str_replace('<br/>', '', $f_content);
+                        $f_content = str_replace('br />', '', $f_content);
                         $f_content = str_replace('/>', '', $f_content);
                         $f_content = str_replace('<', '', $f_content);
                         $f_content = str_replace('a>', '', $f_content);

@@ -167,24 +167,31 @@ class Helper
                 return $result_category;
             }
         }
-        foreach ($lifestyle as $life) {
-            if (strstr($title, $life)) {
-                $result_category = '2';
-                return $result_category;
+        if (empty($result_category)) {
+            foreach ($entertainment as $ent) {
+                if (strstr($title, $ent)) {
+                    $result_category = '3';
+                    return $result_category;
+                }
             }
         }
-        foreach ($entertainment as $ent) {
-            if (strstr($title, $ent)) {
-                $result_category = '3';
-                return $result_category;
+        if (empty($result_category)) {
+            foreach ($beauty as $bet) {
+                if (strstr($title, $bet)) {
+                    $result_category = '6';
+                    return $result_category;
+                }
             }
         }
-        foreach ($beauty as $bet) {
-            if (strstr($title, $bet)) {
-                $result_category = '6';
-                return $result_category;
+        if (empty($result_category)) {
+            foreach ($lifestyle as $life) {
+                if (strstr($title, $life)) {
+                    $result_category = '2';
+                    return $result_category;
+                }
             }
         }
+
         foreach ($health as $h) {
             if (strstr($title, $h)) {
                 $result_category = '8';
