@@ -494,7 +494,7 @@ class LinksController extends Controller
 
     public function ondoctor()
     {
-        $advertisement = ['Similac-Mum', 'solmux-ads', 'Decolgen', 'decolgen', 'Milk-Thistle-Ads'];
+        $advertisement = ['Similac-Mum', 'Similac-Mum', 'solmux-ads', 'Solmux-ads', 'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'milk-thistle-ads', 'Kremil', 'kremil', 'Mixagrip', 'mixagrip', 'Biogesic', 'biogesic', 'Tiffy', 'tiffy', 'Sara', 'sara', 'Enervon', 'enervon', 'Vicee', 'vicee', 'Ceelin', 'ceelin', 'Mixaflu', 'mixaflu', 'Betax', 'betax', 'Musol', 'musol', 'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita', 'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin', 'obimin', 'Mediflu', 'mediflu'];
 
         $link = Link::find(3);
         $scraper = new Scraper(new Client());
