@@ -115,6 +115,7 @@ class LifestyleCron extends Command
                         $f_content = str_replace('<br>', '', $f_content);
                         $f_content = str_replace('<br/>', '', $f_content);
                         $f_content = str_replace('br />', '', $f_content);
+                        $f_content = str_replace('br>', '', $f_content);
                         $convert = str_replace('*', '', $convert);
                         $convert = str_replace('<', '', $convert);
                         $convert = str_replace('<br>', '', $convert);
