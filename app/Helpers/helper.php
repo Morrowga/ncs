@@ -426,6 +426,37 @@ class Helper
         }
         // return  $content_count;
     }
+    public static function duplicate_with_title($id)
+    {
+        $raws = RawArticle::find($id);
+        $title = $raws->title;
+        $raw_articles_all = RawArticle::where('sent_status', '!=', '0')->get();
+        foreach ($raw_articles_all as $raw_articles) {
+            $raw_articles_all_title[] = $raw_articles->title;
+        }
+        foreach ($raw_articles_all_title as $lotaya) {
+            if ($lotaya == $title) {
+                return $title;
+            }
+        }
+        // return $raw_articles_all_title;
+    }
+    public static function duplicate_with_content($id)
+    {
+        $array = [];
+        $raws = RawArticle::find($id);
+        $contents = Content::where('article_id', $raws->id)->whereNotNull('content_text')->get();
+        // return $contents;
+        foreach ($contents as $n_content) {
+            $search_content = DB::table('contents')->where('content_text', 'LIKE', '%' . $n_content->content_text . '%')->get();
+            if ($search_content->count() > 1) {
+                $array[] =  $n_content->content_text;
+            }
+        }
+        if (count($array) > 1) {
+            return $array;
+        }
+    }
 }
     //test category
     // public static function categorywith_title($id)

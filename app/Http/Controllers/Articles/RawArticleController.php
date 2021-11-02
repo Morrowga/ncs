@@ -131,12 +131,16 @@ class RawArticleController extends Controller
         $blacklist = Helper::checkBlacklist($id);
         $sensitive = Helper::sensitive_keywords($id);
         // $content_count = Helper::no_content($id);
+        $duplicate_title = Helper::duplicate_with_title($id);
+        $duplicate_content = Helper::duplicate_with_content($id);
 
         $default = [
             'title' => 'Raw Article Detail',
             'raws' => $raws->find($id),
             'blacklist' => $blacklist,
             'sensitive' => $sensitive,
+            'duplicate_title' => $duplicate_title,
+            'duplicate_content' => $duplicate_content
             // 'content_count' => $content_count
             // 'check_duplicate' => $check_duplicate
         ];

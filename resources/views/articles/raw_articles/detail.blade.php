@@ -5,6 +5,27 @@
     <div class="row">
         <div class="col-2"></div>
         <div class="col-md-8 article">
+            {{-- duplicate --}}
+            @if ($raws->sent_status == 0)
+            @if (!empty($duplicate_title))
+            <h4>Duplicate Title</h4>
+            <p class="blacklist">{{$duplicate_title}}</p>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
+                class="mb-5">
+            @endif
+
+            @if (!empty($duplicate_content))
+            @foreach ($duplicate_content as $dup_con)
+            <h4>Duplicate Content</h4>
+            <p class="blacklist">{{$dup_con}}</p>
+            {{-- <p class="blacklist">{{$duplicate_content}}</p> --}}
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
+                class="mb-5">
+            @endforeach
+
+            @endif
+            @endif
+            {{-- blacklist --}}
             @if (!empty($blacklist))
             <h3>
                 Blacklist Keywords Found
@@ -19,6 +40,7 @@
                 class="mb-3">
             <hr>
             @endif
+            {{-- sensitive --}}
             @if (!empty($sensitive))
             <h3>
                 Sensitive Keywords Found
