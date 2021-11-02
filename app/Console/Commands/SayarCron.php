@@ -139,6 +139,11 @@ class SayarCron extends Command
                             $con = str_replace('p>', '', $con);
                             $con = str_replace('strong>', '', $con);
                             $con = str_replace('<br />', '', $con);
+                            $con = str_replace('a>', '', $con);
+                            $con = str_replace('tr>', '', $con);
+                            $con = str_replace('ul>', '', $con);
+                            $con = str_replace('li>', '', $con);
+                            $con = str_replace('td>', '', $con);
                             $content = new Content;
                             $content->article_id = $current_id;
                             $content->content_text = tounicode($con);

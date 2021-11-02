@@ -14,7 +14,7 @@ class SentArticlesExport implements FromCollection
     public function collection()
     {
         //monthly
-        $month = 10;
+        $month = 11;
         $monthly_report = RawArticle::with('category', 'website')
             ->where('status', 1)
             ->whereMonth('published_date', $month)

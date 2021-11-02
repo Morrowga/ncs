@@ -113,6 +113,7 @@ class MystyleCron extends Command
                         $f_content = str_replace('<br/>', '', $f_content);
                         $f_content = str_replace('br />', '', $f_content);
                         $f_content = str_replace('br>', '', $f_content);
+                        $f_content = str_replace('ol>', '', $f_content);
                         $f_content = str_replace('/>', '', $f_content);
                         $f_content = str_replace('<', '', $f_content);
                         $f_content = str_replace('a>', '', $f_content);
