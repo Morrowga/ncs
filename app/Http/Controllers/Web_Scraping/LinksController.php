@@ -824,7 +824,21 @@ class LinksController extends Controller
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $yyl_content) {
-                    if (stripos($yyl_content, 'src')) {
+                    if (stripos($yyl_content, 'href') !== false) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($yyl_content);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($yyl_content, 'src')) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
                         $dom->loadHTML($yyl_content);
@@ -844,6 +858,7 @@ class LinksController extends Controller
                     } else {
                         $yyl_content = str_replace("class='post-views-count'>", '', $yyl_content);
                         $yyl_content = str_replace('p>', '', $yyl_content);
+                        $yyl_content = str_replace('a>', '', $yyl_content);
                         $yyl_content = str_replace('figure>', '', $yyl_content);
                         $yyl_content = str_replace('<', '', $yyl_content);
                         $convert = html_entity_decode($yyl_content);
@@ -859,7 +874,7 @@ class LinksController extends Controller
 
                                 $del = Content::where('content_text', "")->delete();
 
-                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label'];
+                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label',];
                                 $result = DB::table('contents')
                                     ->where(function ($query) use ($array) {
                                         foreach ($array as $key) {
@@ -871,6 +886,11 @@ class LinksController extends Controller
                         }
                     }
                 }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
     }
