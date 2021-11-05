@@ -101,6 +101,7 @@ class EdgeCron extends Command
                 $current_id = $store_data->id;
 
                 $store_data->content = preg_replace('#(<[p]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
+                $store_data->content = preg_replace('#<script>(.*?)</script>#', '', $store_data->content);
                 // $store_data->content = preg_replace('#(<[span ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $store_data->content);
                 foreach (explode('</', $store_data->content) as $edge_con) {
                     if (stripos($edge_con, 'href') !== false) {
