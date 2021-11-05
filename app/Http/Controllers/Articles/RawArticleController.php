@@ -140,7 +140,7 @@ class RawArticleController extends Controller
             'blacklist' => $blacklist,
             'sensitive' => $sensitive,
             'duplicate_title' => $duplicate_title,
-            'duplicate_content' => $duplicate_content
+            // 'duplicate_content' => $duplicate_content
             // 'content_count' => $content_count
             // 'check_duplicate' => $check_duplicate
         ];

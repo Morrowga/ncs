@@ -14,16 +14,17 @@
                 class="mb-5">
             @endif
 
-            @if (!empty($duplicate_content))
+            {{-- @if (!empty($duplicate_content))
             @foreach ($duplicate_content as $dup_con)
             <h4>Duplicate Content</h4>
             <p class="blacklist">{{$dup_con}}</p>
             {{-- <p class="blacklist">{{$duplicate_content}}</p> --}}
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
+            {{-- <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
                 class="mb-5">
             @endforeach
 
-            @endif
+            @endif --}}
             @endif
             {{-- blacklist --}}
             @if (!empty($blacklist))
