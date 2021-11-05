@@ -131,10 +131,19 @@ class EdgeCron extends Command
                             $content->save();
                         }
                     } else {
+                        $edge_con = str_replace('tr>', '', $edge_con);
+                        $edge_con = str_replace('ul>', '', $edge_con);
+                        $edge_con = str_replace('u>', '', $edge_con);
+                        $edge_con = str_replace('li>', '', $edge_con);
+                        $edge_con = str_replace('td>', '', $edge_con);
+                        $edge_con = str_replace('tbody>', '', $edge_con);
+                        $edge_con = str_replace('table>', '', $edge_con);
+                        $edge_con = str_replace('script>', '', $edge_con);
                         foreach (explode('>', $edge_con) as $con) {
                             $con = strip_tags(str_replace("&nbsp;", " ", $con));
                             $con = str_replace('a', '', $con);
                             $con = str_replace('p', '', $con);
+                            $con = str_replace('u', '', $con);
                             $con = str_replace('strong', '', $con);
                             $con = str_replace('span', '', $con);
                             $con = str_replace('<br />', '', $con);
