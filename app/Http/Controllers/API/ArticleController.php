@@ -611,7 +611,7 @@ class ArticleController extends Controller
 
         $articles_one = DB::table('raw_articles')
             ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
-            ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '>=', $time_one]])
+            ->where([['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '>=', $time_one]])
             ->orderByDesc('article_records.view_count')
             ->orderByDesc('raw_articles.publishedDate')
             // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
@@ -630,7 +630,7 @@ class ArticleController extends Controller
 
         $articles_one = DB::table('raw_articles')
             ->join('article_records', 'raw_articles.id', '=', 'article_records.article_id')
-            ->where([['raw_articles.update_status', '1'], ['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '<=', $time_one], ['raw_articles.publishedDate', '>=', $time_two]])
+            ->where([['raw_articles.sent_status', '1'], ['raw_articles.publishedDate', '<=', $time_one], ['raw_articles.publishedDate', '>=', $time_two]])
             ->orderByDesc('article_records.view_count')
             ->orderByDesc('raw_articles.publishedDate')
             // ->select('raw_articles.id', 'raw_articles.uuid', 'article_records.view_count')
