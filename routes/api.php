@@ -38,6 +38,10 @@ Route::get('categories/list', 'API\CategoryController@index');
 
 Route::post('indexing', 'API\ArticleController@indexing');
 
+Route::get('six', 'API\ArticleController@get_six');
+Route::get('eight', 'API\ArticleController@get_18');
+
+
 
 // Route::get('test-index', 'API\ArticleController@testingIndex');
 
