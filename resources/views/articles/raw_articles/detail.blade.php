@@ -6,7 +6,7 @@
         <div class="col-2"></div>
         <div class="col-md-8 article">
             {{-- duplicate --}}
-            @if ($raws->sent_status == 0)
+            {{-- @if ($raws->sent_status == 0) --}}
             @if (!empty($duplicate_title))
             <h4>Duplicate Title</h4>
             <p class="blacklist">{{$duplicate_title}}</p>
@@ -25,7 +25,7 @@
             @endforeach
 
             @endif --}}
-            @endif
+            {{-- @endif --}}
             {{-- blacklist --}}
             @if (!empty($blacklist))
             <h3>

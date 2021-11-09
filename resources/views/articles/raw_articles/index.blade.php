@@ -59,9 +59,9 @@
                             <thead class="thead-dark">
                                 <tr>
                                     <th width="5%" class="text-center">ID</th>
-                                    <th width="10%" class="text-center">UUID</th>
+                                    <th width="10%" class="text-center">Website</th>
                                     <th width="30%">Title</th>
-                                    <th width="10%">Website</th>
+                                    <th width="10%">Category</th>
                                     <th width="9%" class="text-center">Time Ago</th>
                                     <th width="3%">status</th>
                                     <th width="12%" class="text-center">Actions</th>
@@ -72,9 +72,9 @@
                                 {{-- {{ dd($raw_articles)}} --}}
                                 <tr>
                                     <td>{{ $raw->id }}</td>
-                                    <td>{{ $raw->uuid }}</td>
-                                    <td>{{ Str::limit($raw->title, 80, '...')}}</td>
                                     <td>{{ $raw->website->title}}</td>
+                                    <td>{{ Str::limit($raw->title, 80, '...')}}</td>
+                                    <td>{{ $raw->category->name }}</td>
                                     <td>{{ $raw->created_at->diffForHumans() }}</td>
                                     @if ($raw->sent_status == '0')
                                     <td><i class="fe fe-x-circle fe-16 ml-3" style="color:red"></i></td>
