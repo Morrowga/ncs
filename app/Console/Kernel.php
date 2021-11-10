@@ -10,6 +10,7 @@ use App\Console\Commands\IctCron;
 use App\Console\Commands\MystyleCron;
 use App\Console\Commands\LifestyleCron;
 use App\Console\Commands\ModaCron;
+use App\Console\Commands\MyanmaPlatformCron;
 use App\Console\Commands\OndoctorCron;
 use App\Console\Commands\SayarCron;
 use App\Console\Commands\WeddingguideCron;
@@ -41,7 +42,8 @@ class Kernel extends ConsoleKernel
         YatharCron::class,
         ModaCron::class,
         BuilderguideCron::class,
-        FarmerCron::class
+        FarmerCron::class,
+        MyanmaPlatformCron::class
     ];
 
     /**
