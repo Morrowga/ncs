@@ -133,7 +133,7 @@ class IctCron extends Command
                                 $content->content_image = utf8_decode(urldecode($image));
                                 $content->save();
                             } else {
-                                $image = $image->getAttribute('src');
+                                $image = "https://www.myanmaritdirectory.com/" . $image->getAttribute('src');
                                 $content = new Content();
                                 $content->article_id = $current_id;
                                 $content->content_image = $image;
