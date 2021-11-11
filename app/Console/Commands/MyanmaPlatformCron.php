@@ -153,6 +153,8 @@ class MyanmaPlatformCron extends Command
                             if (empty($store_data->image)) {
                                 $store_data->image = $content->content_image;
                                 $store_data->save();
+                                $content->content_image = "";
+                                $content->save();
                             }
                         }
                     } else {
