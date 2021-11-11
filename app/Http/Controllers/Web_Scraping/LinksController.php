@@ -2073,7 +2073,7 @@ class LinksController extends Controller
                 $store_data->website_id = '51';
                 $store_data->category_id = '2';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime(@$myanma_platform['publish_time']));
-                $store_data->image = $myanma_platform['image'];
+                $store_data->image = null;
                 $store_data->source_link = 'https://www.myanmaplatform.com' . $myanma_platform['url'];
                 $store_data->host = "myanma_platform.com";
                 // return $store_data;
@@ -2153,6 +2153,10 @@ class LinksController extends Controller
                                 }
                             }
                             $content->save();
+                            if (empty($store_data->image)) {
+                                $store_data->image = $content->content_image;
+                                $store_data->save();
+                            }
                         }
                     } else {
                         $f_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $f_content);
