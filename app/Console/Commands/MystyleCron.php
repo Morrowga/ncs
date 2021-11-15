@@ -118,9 +118,12 @@ class MystyleCron extends Command
                         $f_content = str_replace('<', '', $f_content);
                         $f_content = str_replace('a>', '', $f_content);
                         $f_content = str_replace('p>', '', $f_content);
+                        $f_content = str_replace('video>', '', $f_content);
                         $f_content = str_replace('iframe>', '', $f_content);
+                        $f_content = str_replace('em>', '', $f_content);
                         $f_content = str_replace('div>', '', $f_content);
                         $f_content = str_replace('br>', '', $f_content);
+                        $f_content = str_replace('!--[if lt IE 9]>script>document.createElement(\'video\');', '', $f_content);
                         $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
                         $f_content = str_replace('b>', '', $f_content);
                         $convert = html_entity_decode($f_content);
