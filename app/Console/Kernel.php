@@ -61,7 +61,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('lifestyle:cron')->cron('*/10 * * * *');
         $schedule->command('healthcare:cron')->cron('*/10 * * * *');
         $schedule->command('ondoctor:cron')->cron('*/10 * * * *');
-        $schedule->command('ict:cron')->cron('*/3 * * * *');
+        $schedule->command('ict:cron')->cron('*/10 * * * *');
         // $schedule->command('yyl-health:cron')->cron('*/2 * * * *');
         $schedule->command('yyl-ent:cron')->cron('*/10 * * * *');
         $schedule->command('edge:cron')->cron('*/10 * * * *');
