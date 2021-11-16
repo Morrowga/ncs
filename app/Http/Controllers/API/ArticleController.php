@@ -113,7 +113,8 @@ class ArticleController extends Controller
                 // $article_cat->save();
 
                 $article_tag = RawArticle::find($article_cat->id);
-                $article_tag->tags()->sync((array)Helper::indexing_tags($article_tag->id));
+                // $article_tag->tags()->sync((array)Helper::indexing_tags($article_tag->id));
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
             }
         }
