@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\BalloneStarCron;
 use App\Console\Commands\BuilderguideCron;
 use App\Console\Commands\EdgeCron;
 use App\Console\Commands\FarmerCron;
@@ -43,7 +44,8 @@ class Kernel extends ConsoleKernel
         ModaCron::class,
         BuilderguideCron::class,
         FarmerCron::class,
-        MyanmaPlatformCron::class
+        MyanmaPlatformCron::class,
+        BalloneStarCron::class
     ];
 
     /**
@@ -55,7 +57,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('mystyle:cron')->cron('*/3 * * * *');
+        $schedule->command('mystyle:cron')->cron('*/5 * * * *');
         $schedule->command('lifestyle:cron')->cron('*/10 * * * *');
         $schedule->command('healthcare:cron')->cron('*/10 * * * *');
         $schedule->command('ondoctor:cron')->cron('*/10 * * * *');
@@ -69,8 +71,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('moda:cron')->cron('*/10 * * * *');
         $schedule->command('builderguide:cron')->cron('*/10 * * * *');
         $schedule->command('farmer:cron')->cron('*/10 * * * *');
-        $schedule->command('platform:cron')->cron('*/10 * * * *');
-        // $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
+        // $schedule->command('platform:cron')->cron('*/30 * * * *');
+        $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
     }
 
     /**
