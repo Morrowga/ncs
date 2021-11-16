@@ -106,6 +106,8 @@ class YoyarlayEntCron extends Command
                         $yyl_content = str_replace("class='post-views-count'>", '', $yyl_content);
                         $yyl_content = str_replace('p>', '', $yyl_content);
                         $yyl_content = str_replace('a>', '', $yyl_content);
+                        $yyl_content = str_replace('strong>', '', $yyl_content);
+                        $yyl_content = str_replace('em>', '', $yyl_content);
                         $yyl_content = str_replace('figure>', '', $yyl_content);
                         $yyl_content = str_replace('<', '', $yyl_content);
                         $convert = html_entity_decode($yyl_content);
