@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\BalloneStarCron;
 use App\Console\Commands\BuilderguideCron;
 use App\Console\Commands\EdgeCron;
 use App\Console\Commands\FarmerCron;
@@ -43,7 +44,8 @@ class Kernel extends ConsoleKernel
         ModaCron::class,
         BuilderguideCron::class,
         FarmerCron::class,
-        MyanmaPlatformCron::class
+        MyanmaPlatformCron::class,
+        BalloneStarCron::class
     ];
 
     /**
@@ -70,7 +72,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('builderguide:cron')->cron('*/10 * * * *');
         $schedule->command('farmer:cron')->cron('*/10 * * * *');
         $schedule->command('platform:cron')->cron('*/30 * * * *');
-        // $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
+        $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
     }
 
     /**

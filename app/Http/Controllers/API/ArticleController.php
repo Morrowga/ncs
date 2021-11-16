@@ -75,7 +75,8 @@ class ArticleController extends Controller
                                 array_push($get_data_array, $img_src);
                             }
                         } else { // ======================================================== just add text
-                            $plain_text = html_entity_decode($remove_p);
+                            // $plain_text = html_entity_decode($remove_p);
+                            $plain_text = $remove_p;
                             $plain_text = preg_replace("/\r|\n/", "", $plain_text);
                             $plain_text = preg_replace('/\s+/', '', $plain_text);
                             array_push($get_data_array, $plain_text);
@@ -102,15 +103,15 @@ class ArticleController extends Controller
                     } else {
                         $adding->content_text = $datum;
                         $adding->save();
-                        $space = "&nbsp;";
-                        $space_entity = html_entity_decode($space);
-                        $del = Content::where('content_text', '=', $space_entity)->delete();
+                        // $space = "&nbsp;";
+                        // $space_entity = html_entity_decode($space);
+                        // $del = Content::where('content_text', '=', $space_entity)->delete();
                     }
                 }
                 $article_cat = RawArticle::find($raw_article->id);
-                // $article_cat->category_id =  Helper::indexing_category($article_cat->id);
+                $article_cat->category_id =  Helper::indexing_category($article_cat->id);
                 // $article_cat->website_id = '3';
-                // $article_cat->save();
+                $article_cat->save();
 
                 $article_tag = RawArticle::find($article_cat->id);
                 // $article_tag->tags()->sync((array)Helper::indexing_tags($article_tag->id));
