@@ -15,6 +15,16 @@ class WebhookController extends Controller
 {
     public function sendArticle($id)
     {
+
+        $this->SendMethod($id);
+
+        $log = Helper::logText("Send Articles");
+
+        return redirect()->route('sent_articles.index');
+    }
+
+    public function SendMethod($id)
+    {
         $article = RawArticle::with('category', 'tags', 'website')->where('id', $id)->first();
         if ($article) {
             if ($article->sent_status == 1) {
@@ -117,9 +127,5 @@ class WebhookController extends Controller
                 $article_record->save();
             }
         }
-
-        $log = Helper::logText("Send Articles");
-
-        return redirect()->route('sent_articles.index');
     }
 }
