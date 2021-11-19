@@ -51,7 +51,9 @@ class ContentController extends Controller
             } elseif (strpos($explode, 'https') !== false) {
                 $content->content_image = $explode;
             } else {
-                $content->content_text = $explode;
+                $plain_text = html_entity_decode($explode);
+                $plain_text = preg_replace("/\r|\n/", "", $plain_text);
+                $content->content_text = $plain_text;
             }
             $content->save();
         }
