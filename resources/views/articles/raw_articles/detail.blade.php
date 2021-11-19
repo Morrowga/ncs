@@ -9,7 +9,8 @@
             @if ($raws->sent_status == 0)
             @if (!empty($duplicate_title))
             <h4>Duplicate Title</h4>
-            <p class="blacklist">{{$duplicate_title}}</p>
+            <p class="blacklist">id => {{$duplicate_title[0]}}</p>
+            <p class="blacklist">title => {{$duplicate_title[1]}}</p>
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOMWY9p7zi6SPW4Sc-G04uoLqSabkH08U-_A&usqp=CAU"
                 class="mb-5">
             @endif
