@@ -103,9 +103,9 @@ class ArticleController extends Controller
                     } else {
                         $adding->content_text = $datum;
                         $adding->save();
-                        // $space = "&nbsp;";
-                        // $space_entity = html_entity_decode($space);
-                        // $del = Content::where('content_text', '=', $space_entity)->delete();
+                        $space = "&nbsp;";
+                        $space_entity = html_entity_decode($space);
+                        $del = Content::where('content_text', '=', $space_entity)->delete();
                     }
                 }
                 $article_cat = RawArticle::find($raw_article->id);
