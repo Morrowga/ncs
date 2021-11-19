@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\Helper;
+use App\Http\Controllers\Notify\WebhookController;
 use DOMDocument;
 use App\Models\Scrapes\Content;
 use App\Models\Scrapes\Link;
@@ -77,6 +78,7 @@ class BalloneStarCron extends Command
                 }
                 $store_data->source_link = $ballone_data['source'];
                 $store_data->host = "ballonestar.com";
+                $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
                 $content = new Content;
@@ -136,6 +138,11 @@ class BalloneStarCron extends Command
                 $article_tag = RawArticle::find($article_cat->id);
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
+
+                //auto
+                $auto = new WebhookController();
+                $auto->SendMethod($store_data->id);
+                $log = Helper::logText("BalloneStar auto send the data");
             }
         }
         Log::info("BalloneStar CronJob is Working");
