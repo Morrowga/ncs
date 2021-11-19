@@ -76,9 +76,9 @@ class ArticleController extends Controller
                             }
                         } else { // ======================================================== just add text
                             $plain_text = html_entity_decode($remove_p);
-                            $plain_text = $remove_p;
+                            // $plain_text = $remove_p;
                             $plain_text = preg_replace("/\r|\n/", "", $plain_text);
-                            $plain_text = preg_replace('/\s+/', '', $plain_text);
+                            // $plain_text = preg_replace('/\s+/', '', $plain_text);
                             array_push($get_data_array, $plain_text);
                         }
                     }
