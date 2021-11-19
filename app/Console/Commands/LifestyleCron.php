@@ -120,6 +120,7 @@ class LifestyleCron extends Command
                         $convert = str_replace('<', '', $convert);
                         $convert = str_replace('<br>', '', $convert);
                         $convert = str_replace('figure>', '', $convert);
+                        $convert = str_replace('figcaption>', '', $convert);
                         $convert = str_replace('p>', '', $convert);
                         foreach (explode('h1>', $convert) as $con) {
                             foreach (explode('strong>', $con) as $con_strong) {
