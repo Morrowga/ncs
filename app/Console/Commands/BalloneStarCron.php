@@ -139,10 +139,13 @@ class BalloneStarCron extends Command
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
 
-                //auto
-                $auto = new WebhookController();
-                $auto->SendMethod($store_data->id);
-                $log = Helper::logText("BalloneStar auto send the data");
+                //check duplicate title
+                if(empty(Helper::duplicate_with_title($store_data->id))){
+                    //auto test
+                    $auto = new WebhookController();
+                    $auto->SendMethod($store_data->id);
+                    $log = Helper::logText("BalloneStar auto send the data");
+                }
             }
         }
         Log::info("BalloneStar CronJob is Working");

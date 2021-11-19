@@ -438,15 +438,11 @@ class Helper
     {
         $raws = RawArticle::find($id);
         $title = $raws->title;
-        $raw_articles_all = RawArticle::where('sent_status', '!=', '0')->get();
-        foreach ($raw_articles_all as $raw_articles) {
-            $raw_articles_all_title[] = $raw_articles->title;
+        $search_title = RawArticle::where([['title','LIKE','%'.$title.'%'], ['sent_status', '!=', '0']])->first();
+        if ($search_title && $search_title->count() > 0) {
+            return [$search_title->id,$search_title->title];
         }
-        foreach ($raw_articles_all_title as $lotaya) {
-            if ($lotaya == $title) {
-                return $title;
-            }
-        }
+        return [];
         // return $raw_articles_all_title;
     }
     public static function duplicate_with_content($id)
