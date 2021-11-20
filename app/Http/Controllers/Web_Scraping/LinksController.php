@@ -331,7 +331,7 @@ class LinksController extends Controller
         $d = json_decode($e, true);
 
         $rss = new DOMDocument();
-        $rss->loadXML($d);
+        @$rss->loadXML($d);
         $feed = array();
         foreach ($rss->getElementsByTagName('item') as $node) {
             $item = array(
