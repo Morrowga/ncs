@@ -84,6 +84,7 @@ class IctCron extends Command
                 $store_data->image = "https://" . $ict_data['images']['lg'];
                 $store_data->source_link = $true_url;
                 $store_data->host = "ictdirectory.com.mm";
+                $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
                 $content = new Content;

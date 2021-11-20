@@ -64,6 +64,7 @@ class Healthcare extends Command
                 $store_data->image = $d['image'];
                 $store_data->host = "healthcare.com.mm";
                 $store_data->source_link = $d['posturl'];
+                $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
                 $date_format = date("Y-m-d");

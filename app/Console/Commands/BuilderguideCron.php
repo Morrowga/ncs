@@ -90,6 +90,7 @@ class BuilderguideCron extends Command
                 }
 
                 $store_data->source_link = $builder_guide_data['link'];
+                $store_data->uuid = Helper::uuid();
                 // dd($store_data);
                 $store_data->save();
 

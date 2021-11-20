@@ -82,6 +82,7 @@ class WeddingguideCron extends Command
                 $store_data->host = "weddingguide.com.mm";
 
                 $store_data->source_link = 'https://' . $wedding_data['link'];
+                $store_data->uuid = Helper::uuid();
                 // dd($store_data);
                 $store_data->save();
 

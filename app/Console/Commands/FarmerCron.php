@@ -92,6 +92,8 @@ class FarmerCron extends Command
                         }
 
                         $store_data->source_link = $farmer_data['url'];
+                        $store_data->uuid = Helper::uuid();
+
                         // dd($store_data);
                         $store_data->save();
 

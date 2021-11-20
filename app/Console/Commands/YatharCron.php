@@ -91,6 +91,7 @@ class YatharCron extends Command
                 $raw->website_id = $f['website_id'];
                 $raw->category_id = $f['category_id'];
                 $raw->host = "yathar.com";
+                $raw->uuid = Helper::uuid();
                 // dd($raw);
                 $raw->save();
 

@@ -92,6 +92,7 @@ class LifestyleCron extends Command
                 $raw->website_id = $f['website_id'];
                 // $raw->category_id = $f['category_id'];
                 $raw->host = "lifestylemyanmar.com";
+                $raw->uuid = Helper::uuid();
                 $raw->save();
 
                 $current_id = $raw->id;

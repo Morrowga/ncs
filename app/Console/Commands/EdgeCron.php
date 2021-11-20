@@ -82,6 +82,7 @@ class EdgeCron extends Command
                 $store_data->image = $edge_data['images'];
                 $store_data->source_link = $edge_data['link'];
                 $store_data->host = "edge.com.mm";
+                $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
                 $content = new Content;
