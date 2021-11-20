@@ -90,6 +90,8 @@ class OndoctorCron extends Command
                                     $con_li = str_replace('<', '', $con_li);
                                     $con_li = str_replace('a>', '', $con_li);
                                     $con_li = str_replace('h4>', '', $con_li);
+                                    $con_li = str_replace('span>', '', $con_li);
+                                    $con_li = str_replace('span style=\'font-weight: 400;\'>', '', $con_li);
                                     $content = new Content();
                                     $content->article_id = $article->id;
                                     $content->content_text = $con_li;
