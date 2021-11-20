@@ -55,13 +55,13 @@ class RawArticleController extends Controller
             ->orderByDesc('id');
 
         // insert uuid
-        foreach ($raw_articles->get() as $raw) {
-            if (empty($raw->uuid)) {
-                $data = RawArticle::find($raw->id);
-                $data->uuid = Helper::uuid();
-                $data->save();
-            }
-        }
+        // foreach ($raw_articles->get() as $raw) {
+        //     if (empty($raw->uuid)) {
+        //         $data = RawArticle::find($raw->id);
+        //         $data->uuid = Helper::uuid();
+        //         $data->save();
+        //     }
+        // }
 
         $default = [
             'raw_articles' => $raw_articles->paginate(15),
