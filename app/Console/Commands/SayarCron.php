@@ -84,6 +84,7 @@ class SayarCron extends Command
                 $store_data->image = "https://" . $sayar_data['images']['lg'];
                 $store_data->source_link = $sayar_link;
                 $store_data->host = "sayar.com.mm";
+                $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
                 $content = new Content;

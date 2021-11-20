@@ -88,6 +88,7 @@ class MystyleCron extends Command
                 $raw->website_id = $f['website_id'];
                 // $raw->category_id = $f['category_id'];
                 $raw->host = "mystylemyanmar.com";
+                $raw->uuid = Helper::uuid();
                 $raw->save();
 
                 $current_id = $raw->id;

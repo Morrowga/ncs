@@ -39,6 +39,7 @@ class ArticleController extends Controller
                 $raw_article->category_id = '1';
                 $raw_article->content = $index_data['content'];
                 $raw_article->publishedDate = date('Y-m-d H:i:s', strtotime($index_data['publishedDate']));
+                $raw_article->uuid = Helper::uuid();
                 $raw_article->save();
 
                 $get_data_array = $get_array = [];

@@ -56,7 +56,7 @@ class RawArticleController extends Controller
 
         // insert uuid
         foreach ($raw_articles->get() as $raw) {
-            if (!$raw->uuid) {
+            if (empty($raw->uuid)) {
                 $data = RawArticle::find($raw->id);
                 $data->uuid = Helper::uuid();
                 $data->save();

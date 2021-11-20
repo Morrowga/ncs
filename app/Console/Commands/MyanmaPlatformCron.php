@@ -73,6 +73,7 @@ class MyanmaPlatformCron extends Command
                 $store_data->image = null;
                 $store_data->source_link = 'https://www.myanmaplatform.com' . $myanma_platform['url'];
                 $store_data->host = "myanma_platform.com";
+                $store_data->uuid = Helper::uuid();
                 // return $store_data;
                 $ch = curl_init();
                 $url = $store_data->source_link;
