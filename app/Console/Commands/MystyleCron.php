@@ -56,6 +56,9 @@ class MystyleCron extends Command
 
         $data = curl_exec($ch);
 
+        $invalid_characters = '/[^\x9\xa\x20-\xD7FF\xE000-\xFFFD]/';
+        $data = preg_replace($invalid_characters, '', $data);
+
         curl_close($ch);
         $e = json_encode($data);
         $d = json_decode($e, true);
