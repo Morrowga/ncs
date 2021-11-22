@@ -263,7 +263,7 @@ class LinksController extends Controller
 
                 $current_id = $raw->id;
 
-                foreach (explode('</', str_replace(array('<p>'), '</', tounicode($raw->content))) as $f_content) {
+                foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
                     if (stripos($f_content, 'src')) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
@@ -1752,7 +1752,7 @@ class LinksController extends Controller
                         $store_data = new RawArticle();
                         $store_data->title = tounicode($farmer_data['title']);
                         $farmer_data['description'] = str_replace(array("\n", "\r", "\t"), '', $farmer_data['description']);
-                        $convert = html_entity_decode(tounicode($farmer_data['description']));
+                        $convert = html_entity_decode($farmer_data['description']);
                         $store_data->content = $convert;
                         $store_data->website_id = '49';
                         $store_data->category_id = '12';
