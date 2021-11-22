@@ -73,7 +73,7 @@ class LifestyleCron extends Command
                 'image' => $node->getElementsByTagName('content')->item(0)->getAttribute('url'),
                 'website_id' => '1',
                 'providerCategory' => $node->getElementsByTagName('category')->item(0)->nodeValue,
-                'category_id' => '1'
+                'category_id' => '2'
             );
             array_push($feed, $item);
         }
@@ -90,14 +90,14 @@ class LifestyleCron extends Command
                 $raw->content = tounicode($f['content']);
                 $raw->image = $f['image'];
                 $raw->website_id = $f['website_id'];
-                // $raw->category_id = $f['category_id'];
+                $raw->category_id = $f['category_id'];
                 $raw->host = "lifestylemyanmar.com";
                 $raw->uuid = Helper::uuid();
                 $raw->save();
 
                 $current_id = $raw->id;
 
-                foreach (explode('</', str_replace(array('<p>'), '</', tounicode($raw->content))) as $f_content) {
+                foreach (explode('</', str_replace(array('<p>'), '</', $raw->content)) as $f_content) {
                     if (stripos($f_content, 'src')) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);

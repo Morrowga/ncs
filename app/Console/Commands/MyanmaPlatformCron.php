@@ -68,7 +68,7 @@ class MyanmaPlatformCron extends Command
                 $store_data->title = tounicode($myanma_platform['title']);
                 $store_data->content = @$myanma_platform['description'];
                 $store_data->website_id = '51';
-                // $store_data->category_id = '2';
+                $store_data->category_id = '8';
                 $store_data->publishedDate =  date('Y-m-d H:i:s', strtotime(@$myanma_platform['publish_time']));
                 $store_data->image = null;
                 $store_data->source_link = 'https://www.myanmaplatform.com' . $myanma_platform['url'];
@@ -217,9 +217,9 @@ class MyanmaPlatformCron extends Command
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
 
-                $article_cat->category_id =  Helper::suggest_category($article_cat->id);
+                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
                 // $article_cat->website_id = Helper::suggest_website($article_cat->id);
-                $article_cat->save();
+                // $article_cat->save();
             }
         }
         Log::info("Myanma Platform CronJob is Working");
