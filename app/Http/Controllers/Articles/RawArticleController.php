@@ -190,7 +190,6 @@ class RawArticleController extends Controller
     {
         //
         $raws = RawArticle::with('category', 'website', 'tags')->findorFail($id);
-        $raws->uuid = Helper::uuid();
         $raws->source_link = $request->source_link;
         $raws->website_id = $request->website_id;
         $raws->category_id = $request->category_id;
