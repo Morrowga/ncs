@@ -42,11 +42,11 @@ class Helper
             'CIVIL DISOBEDIENCE MOVEMENT', 'civildisobediencemovement', 'civil disobedience movement', 'မင်းအောင်လှိုင်', 'မအလ', 'CRPH', 'crph', 'Committee Representing Pyidaungsu Hluttaw',
             'COMMITTEEREPRESENTINGPYIDAUNGSUHLUTTAW', 'COMMITTEE REPRESENTING PYIDAUNGSU HLUTTAW', 'CommitteeRepresentingPyidaungsuHluttaw', 'committeerepresentingpyidaungsuhluttaw',
             'committee representing pyidaungsu hluttaw', 'ဒေါ်အောင်ဆန်းစုကြည်', 'အမေစု', 'နိုင်ငံတော်အတိုင်ပင်ခံပဂ္ဂိုလ်', 'VPN', 'vpn', 'Virtual Private Network', 'VirtualPrivateNetwork', 'VIRTUALPRIVATENETWORK',
-            'VIRTUAL PRIVATE NETWORK', 'virtual private network', 'virtualprivatenetwork', 'မြန်မာ့တပ်မတော်', 'အာဏာသိမ်းစစ်တပ်', 'စစ်ကောင်စီ', 'စကစ', 'Facebook', 'facebook', 'FACEBOOK', 'အကျဉ်းထောင်',
+            'VIRTUAL PRIVATE NETWORK', 'virtual private network', 'virtualprivatenetwork', 'မြန်မာ့တပ်မတော်', 'အာဏာသိမ်းစစ်တပ်', 'စစ်ကောင်စီ', 'စကစ', 'အကျဉ်းထောင်',
             'UNITED NATIONS', 'ကုလသမဂ္ဂ', 'ပုဒ်မ-၅၀၅(က)', 'ပုဒ်မ-၅၀၅(ခ)', 'ပုဒ်မ-၅၉(ဃ)', 'အာဆီယံ', 'အရှေ့တောင်အာရှနိုင်ငံများအသင်း', 'ASEAN', 'asean', 'Asean', 'ထိန်းသိမ်းခံ',
             'ဖဒရယ်', 'Federal', 'federal', 'နိုင်ငံရေးသမား', 'အမျိုးသားဒီမိုကရေစီအဖွဲ့ချုပ်', 'NLD', 'National League for Democracy', 'NationalLeagueforDemocracy', 'NATIONALLEAUGEFORDEMOCRACY', 'NATIONAL LEAGUE FOR DEMOCRACY',
             'nationalleaguedemocracy', 'natioanl league democracy', 'ဗုံး', 'ဗုံးပေါက်ကွဲ', 'ဗုံးခွဲတိုက်ခိုက်ခံရ', 'Boycott', 'ဒေါက်တာဆာဆာ', 'စစ်ကျွန်ပညာရေး', 'ဒေါက်တာဇော်ဝေစိုး', 'အာဏာသိမ်း', 'အာဏာထိမ်း',
-            'အာဏာရှင်', 'အာဏာရူး', 'နိုင်ငံရေး အကျဉ်းသား', 'နွေဦးတော်လှန်ရေး', 'တရားဥပဒေ စိုးမိုးမှု', 'ဆူပူအောင်လှုံဆော်မှု', 'ဒလန်', 'ကျောင်းသားသမဂ္ဂ', 'လက်နက်', 'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်', 'Wave Money', 'wave money',
+            'အာဏာရှင်', 'အာဏာရူး', 'နိုင်ငံရေး အကျဉ်းသား', 'နွေဦးတော်လှန်ရေး', 'တရားဥပဒေ စိုးမိုးမှု', 'ဆူပူအောင်လှုံဆော်မှု', 'ဒလန်', 'ကျောင်းသားသမဂ္ဂ', 'လက်နက်', 'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်', 'Wave Money', 'wave money','Meta','meta'
         );
         $blist = [];
         $raws = RawArticle::find($id);
@@ -66,7 +66,7 @@ class Helper
     public static function sensitive_keywords($id)
     {
         $sensitive_keywors = array(
-            'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်', '18+', '၁၈+', 'fuck', 'Fuck', 'လိင်ဆက်ဆံ', 'လိင်', 'sex', 'suck', 'dick', 'shit', 'ဖောင်းဒိုင်း', 'Sexual', 'sexual', 'sexuality', 'Sexuality', 'နိုင်ငံရေး', 'ကျောင်းသားများ သမဂ္ဂ', 'သမဂ္ဂ'
+            'telenor', 'Telenor', 'တယ်လီနော', 'ooredoo', 'Ooredoo', 'အော်ရီဒူး', 'mytel', 'Mytel', 'မိုင်တဲ', 'mectel', 'Mectel', 'ကမ်းရိုးတန်းဖုန်းနံပါတ်', '18+', '၁၈+', 'fuck', 'Fuck', 'လိင်ဆက်ဆံ', 'လိင်', 'sex', 'suck', 'dick', 'shit', 'ဖောင်းဒိုင်း', 'Sexual', 'sexual', 'sexuality', 'Sexuality', 'နိုင်ငံရေး', 'ကျောင်းသားများ သမဂ္ဂ', 'သမဂ္ဂ','Meta','meta'
         );
         $sensitive_list = [];
         $raws = RawArticle::find($id);
