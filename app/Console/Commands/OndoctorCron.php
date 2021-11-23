@@ -47,7 +47,15 @@ class OndoctorCron extends Command
      */
     public function handle()
     {
-        $advertisement = ['Similac-Mum', 'Similac-Mum', 'solmux-ads', 'Solmux-ads', 'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'milk-thistle-ads', 'Kremil', 'kremil', 'Mixagrip', 'mixagrip', 'Biogesic', 'biogesic', 'Tiffy', 'tiffy', 'Sara', 'sara', 'Enervon', 'enervon', 'Vicee', 'vicee', 'Ceelin', 'ceelin', 'Mixaflu', 'mixaflu', 'Betax', 'betax', 'Musol', 'musol', 'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita', 'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin', 'obimin', 'Mediflu', 'mediflu', 'Revicon', 'revicon', 'Vitahome', 'vitahome', 'Livolin', 'livolin'];
+        $advertisement = ['Similac-Mum', 'Similac-Mum', 'solmux-ads', 'Solmux-ads',
+        'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'milk-thistle-ads', 'Kremil',
+        'kremil', 'Mixagrip', 'mixagrip', 'Biogesic', 'biogesic', 'Tiffy',
+        'tiffy', 'Sara', 'sara', 'Enervon', 'enervon', 'Vicee', 'vicee', 'Ceelin',
+         'ceelin', 'Mixaflu', 'mixaflu', 'Betax', 'betax', 'Musol', 'musol',
+          'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita',
+          'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin',
+          'obimin', 'Mediflu', 'mediflu', 'Revicon', 'revicon', 'Vitahome',
+          'vitahome', 'Livolin', 'livolin','Flemex','flemex','Antigas','antigas'];
 
         $link = Link::find(3);
         $scraper = new Scraper(new Client());
