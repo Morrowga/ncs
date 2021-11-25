@@ -457,7 +457,7 @@ class Helper
                 $array[] =  $n_content->content_text;
             }
         }
-        if (count($array) > 1) {
+        if (count($array) > 2) {
             return $array;
         }
     }
