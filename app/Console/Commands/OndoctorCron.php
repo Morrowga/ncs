@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\Helper;
+use App\Http\Controllers\Notify\WebhookController;
 use Illuminate\Console\Command;
 use DOMDocument;
 use App\Models\Scrapes\Content;
@@ -116,6 +117,22 @@ class OndoctorCron extends Command
                 $article_tag = RawArticle::find($article_cat->id);
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
+
+                //check duplicate title
+                if(empty(Helper::no_content($article->id))){
+                    if(empty(Helper::duplicate_with_title($article->id))){
+                        if(empty(Helper::duplicate_with_content($article->id))){
+                            if(empty(Helper::sensitive_keywords($article->id))){
+                                if(empty(Helper::checkBlacklist($article->id))){
+                                    //auto send
+                                    $auto = new WebhookController();
+                                    $auto->SendMethod($article->id);
+                                    $log = Helper::logText("Ondoctor auto send the data");
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         Log::info("Ondoctor CronJob is Working");
