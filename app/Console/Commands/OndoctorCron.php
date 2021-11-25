@@ -121,7 +121,7 @@ class OndoctorCron extends Command
                 //check duplicate title
                 if(empty(Helper::no_content($article->id))){
                     if(empty(Helper::duplicate_with_title($article->id))){
-                        if(empty(Helper::duplicate_with_content($article->id))){
+                        // if(empty(Helper::duplicate_with_content($article->id))){
                             if(empty(Helper::sensitive_keywords($article->id))){
                                 if(empty(Helper::checkBlacklist($article->id))){
                                     //auto send
@@ -130,7 +130,7 @@ class OndoctorCron extends Command
                                     $log = Helper::logText("Ondoctor auto send the data");
                                 }
                             }
-                        }
+                        // }
                     }
                 }
             }
