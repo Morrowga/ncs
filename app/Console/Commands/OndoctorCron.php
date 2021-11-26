@@ -119,18 +119,16 @@ class OndoctorCron extends Command
                 $article_tag->save();
 
                 //check duplicate title
-                if(empty(Helper::no_content($article->id))){
-                    if(empty(Helper::duplicate_with_title($article->id))){
-                        // if(empty(Helper::duplicate_with_content($article->id))){
-                            if(empty(Helper::sensitive_keywords($article->id))){
-                                if(empty(Helper::checkBlacklist($article->id))){
-                                    //auto send
-                                    $auto = new WebhookController();
-                                    $auto->SendMethod($article->id);
-                                    $log = Helper::logText("Ondoctor auto send the data");
-                                }
+                if(empty(Helper::duplicate_with_title($article->id))){
+                    if(empty(Helper::duplicate_with_content($article->id))){
+                        if(empty(Helper::sensitive_keywords($article->id))){
+                            if(empty(Helper::checkBlacklist($article->id))){
+                                //auto send
+                                $auto = new WebhookController();
+                                $auto->SendMethod($article->id);
+                                $log = Helper::logText("Ondoctor auto send the data");
                             }
-                        // }
+                        }
                     }
                 }
             }

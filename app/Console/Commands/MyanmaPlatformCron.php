@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\Helper;
+use App\Http\Controllers\Notify\WebhookController;
 use DOMDocument;
 use App\Models\Scrapes\Content;
 use App\Models\Scrapes\Link;
@@ -217,9 +218,19 @@ class MyanmaPlatformCron extends Command
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
 
-                // $article_cat->category_id =  Helper::suggest_category($article_cat->id);
-                // $article_cat->website_id = Helper::suggest_website($article_cat->id);
-                // $article_cat->save();
+                 //check duplicate title
+                 if(empty(Helper::duplicate_with_title($store_data->id))){
+                    if(empty(Helper::duplicate_with_content($store_data->id))){
+                        if(empty(Helper::sensitive_keywords($store_data->id))){
+                            if(empty(Helper::checkBlacklist($store_data->id))){
+                                //auto send
+                                $auto = new WebhookController();
+                                $auto->SendMethod($store_data->id);
+                                $log = Helper::logText("Ondoctor auto send the data");
+                            }
+                        }
+                    }
+                }
             }
         }
         Log::info("Myanma Platform CronJob is Working");
