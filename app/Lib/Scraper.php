@@ -6,6 +6,7 @@ use App\Models\Articles\RawArticle;
 use Goutte\Client as GoutteClient;
 use App\Website;
 use App\Category;
+use App\Helpers\Helper;
 use Carbon\Carbon;
 use App\Models\Scrapes\Content;
 use DOMDocument;
@@ -125,6 +126,8 @@ class Scraper
                 $article = new RawArticle();
 
                 $article->title = tounicode($val);
+
+                $article->uuid = Helper::uuid();
 
                 $article->content = isset($data['content'][$k]) ? $data['content'][$k] : "";
 
