@@ -127,7 +127,8 @@ class IctCron extends Command
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
-                            if (strpos($ict_con, '/images')) {
+                            $pone = strpos($ict_con, 'images');
+                            if ($pone !== false) {
                                 $image = "https://www.myanmaritdirectory.com/" . $image->getAttribute('src');
                                 $content = new Content();
                                 $content->article_id = $current_id;
