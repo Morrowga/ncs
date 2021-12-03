@@ -51,6 +51,7 @@ Route::put('raw_articles/sent_lotaya/{id}', 'Articles\RawArticleController@sent_
 Route::put('raw_articles/duplicate/{id}', 'Articles\RawArticleController@duplicate')->name('raw_articles.duplicate');
 Route::put('raw_articels/blacklist/{id}', 'Articles\RawArticleController@blacklist')->name('raw_articles.blacklist');
 Route::get('activities', 'Articles\RawArticleController@activityLog')->name('activity');
+Route::get('mystyle_title', 'MystyleTitleController@index')->name('mystyle_title');
 
 
 // get data and crawl data
