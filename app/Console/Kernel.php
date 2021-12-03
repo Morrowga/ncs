@@ -73,6 +73,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('farmer:cron')->cron('*/10 * * * *');
         $schedule->command('platform:cron')->cron('*/30 * * * *');
         $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
+        $schedule->command('mystyle_title:cron')->cron('*/10 * * * *');
     }
 
     /**
