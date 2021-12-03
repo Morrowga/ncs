@@ -31,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!empty$mystyle_title)
+                    @if (!empty($mystyle_title))
                     @foreach ($mystyle_title as $title)
                     <tr>
                         <td>{{$title->title}}</td>
