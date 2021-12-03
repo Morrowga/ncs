@@ -56,7 +56,10 @@ class OndoctorCron extends Command
           'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita',
           'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin',
           'obimin', 'Mediflu', 'mediflu', 'Revicon', 'revicon', 'Vitahome',
-          'vitahome', 'Livolin', 'livolin','Flemex','flemex','Antigas','antigas'];
+          'vitahome', 'Livolin', 'livolin','Flemex','flemex','Antigas','antigas',
+          'Ketorex','ketorex','Hiruscar','hiruscar','Bio-Oil','Hiruscar','Voltex',
+          'Len-sen','lensen','Lensen','len-sen','Tothema','tothema','Burn'
+        ];
 
         $link = Link::find(3);
         $scraper = new Scraper(new Client());
