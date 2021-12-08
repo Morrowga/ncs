@@ -48,17 +48,18 @@ class OndoctorCron extends Command
      */
     public function handle()
     {
-        $advertisement = ['Similac-Mum', 'Similac-Mum', 'solmux-ads', 'Solmux-ads',
-        'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'milk-thistle-ads', 'Kremil',
-        'kremil', 'Mixagrip', 'mixagrip', 'Biogesic', 'biogesic', 'Tiffy',
-        'tiffy', 'Sara', 'sara', 'Enervon', 'enervon', 'Vicee', 'vicee', 'Ceelin',
-         'ceelin', 'Mixaflu', 'mixaflu', 'Betax', 'betax', 'Musol', 'musol',
-          'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita',
-          'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin',
-          'obimin', 'Mediflu', 'mediflu', 'Revicon', 'revicon', 'Vitahome',
-          'vitahome', 'Livolin', 'livolin','Flemex','flemex','Antigas','antigas',
-          'Ketorex','ketorex','Hiruscar','hiruscar','Bio-Oil','Hiruscar','Voltex',
-          'Len-sen','lensen','Lensen','len-sen','Tothema','tothema','Burn'
+        $advertisement = [
+            'Similac-Mum', 'Similac-Mum', 'solmux-ads', 'Solmux-ads',
+            'Decolgen', 'decolgen', 'Milk-Thistle-Ads', 'milk-thistle-ads', 'Kremil',
+            'kremil', 'Mixagrip', 'mixagrip', 'Biogesic', 'biogesic', 'Tiffy',
+            'tiffy', 'Sara', 'sara', 'Enervon', 'enervon', 'Vicee', 'vicee', 'Ceelin',
+            'ceelin', 'Mixaflu', 'mixaflu', 'Betax', 'betax', 'Musol', 'musol',
+            'Konidine', 'konidine', 'Nutrovitar', 'nutrovitar', 'Nutrivita',
+            'nutrivita', 'Ferovit', 'ferovit', 'Ferofort', 'ferofort', 'Obimin',
+            'obimin', 'Mediflu', 'mediflu', 'Revicon', 'revicon', 'Vitahome',
+            'vitahome', 'Livolin', 'livolin', 'Flemex', 'flemex', 'Antigas', 'antigas',
+            'Ketorex', 'ketorex', 'Hiruscar', 'hiruscar', 'Bio-Oil', 'Hiruscar', 'Voltex',
+            'Len-sen', 'lensen', 'Lensen', 'len-sen', 'Tothema', 'tothema', 'Burn', 'CLA'
         ];
 
         $link = Link::find(3);
@@ -122,10 +123,10 @@ class OndoctorCron extends Command
                 $article_tag->save();
 
                 //check duplicate title
-                if(empty(Helper::duplicate_with_title($article->id))){
-                    if(empty(Helper::duplicate_with_content($article->id))){
-                        if(empty(Helper::sensitive_keywords($article->id))){
-                            if(empty(Helper::checkBlacklist($article->id))){
+                if (empty(Helper::duplicate_with_title($article->id))) {
+                    if (empty(Helper::duplicate_with_content($article->id))) {
+                        if (empty(Helper::sensitive_keywords($article->id))) {
+                            if (empty(Helper::checkBlacklist($article->id))) {
                                 //auto send
                                 $auto = new WebhookController();
                                 $auto->SendMethod($article->id);
