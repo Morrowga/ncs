@@ -49,30 +49,10 @@ class ArticleController extends Controller
                 foreach ($arr_datum as $datum) {
                     if (!empty($datum)) { // =============================================== condition for removing &nbsp; *its not working*
                         $remove_p = str_replace('<p>', "", $datum); // ===================== remove <p>
-                        $remove_p = str_replace('<table>', "", $datum);
-                        $remove_p = str_replace('<tbody>', "", $datum);
-                        $remove_p = str_replace('<th>', "", $datum);
-                        $remove_p = str_replace('<tr>', "", $datum);
-                        $remove_p = str_replace('<td>', "", $datum);
-                        $remove_p = str_replace('</table>', "", $datum);
-                        $remove_p = str_replace('</th>', "", $datum);
-                        $remove_p = str_replace('</tbody>', "", $datum);
-                        $remove_p = str_replace('</tr>', "", $datum);
-                        $remove_p = str_replace('</td>', "", $datum);
 
                         if (stripos($remove_p, '<strong>') !== false) { // =========================== find strong and remove
                             $remove_p = str_replace('<strong>', '', $remove_p);
                             $remove_p = str_replace('</strong>', '', $remove_p);
-                            $remove_p = str_replace('<table>', "", $remove_p);
-                            $remove_p = str_replace('<tbody>', "", $remove_p);
-                            $remove_p = str_replace('<th>', "", $remove_p);
-                            $remove_p = str_replace('<tr>', "", $remove_p);
-                            $remove_p = str_replace('<td>', "", $remove_p);
-                            $remove_p = str_replace('</table>', "", $remove_p);
-                            $remove_p = str_replace('</th>', "", $remove_p);
-                            $remove_p = str_replace('</tbody>', "", $remove_p);
-                            $remove_p = str_replace('</tr>', "", $remove_p);
-                            $remove_p = str_replace('</td>', "", $remove_p);
 
                             array_push($get_data_array, $remove_p);
                         } elseif (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
