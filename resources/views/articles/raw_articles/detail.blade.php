@@ -114,7 +114,7 @@
             @foreach ($contents as $content)
 
             @if ($content->content_text)
-            <p>{{ $content->content_text }}</p>
+            <p>{{ strip_tags($content->content_text) }}</p>
             @endif
 
             @if ($content->content_image)

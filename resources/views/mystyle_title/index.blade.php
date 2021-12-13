@@ -13,13 +13,13 @@
            <div class="col-md-8">
                <h4 class="p-4 text-center">Mystyle Title</h4>
             <form action="{{route('mystyle_title')}}" method="get" class="form-inline" >
-            <div class="col-sm-5 form-group">
-                <div class="input-group">
-                 <input class="form-control" name="date" type="date" >
-                 <div class="input-group-btn ml-2">
-                   <button type="submit" class="btn btn-success">Search</button>
-                 </div>
-               </div>
+                <div class="col-sm-5 form-group">
+                    <div class="input-group">
+                        <input class="form-control" name="date" type="date" >
+                    <div class="input-group-btn ml-2">
+                        <button type="submit" class="btn btn-success">Search</button>
+                    </div>
+                </div>
             </div>
 
             <table class="table mt-2">
