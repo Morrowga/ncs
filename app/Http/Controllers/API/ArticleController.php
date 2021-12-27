@@ -401,7 +401,7 @@ class ArticleController extends Controller
             $result['data'] = null;
         }
 
-        $log = Helper::logText("Multi New Articles");
+        // $log = Helper::logText("Multi New Articles");
 
         return $result;
     }
