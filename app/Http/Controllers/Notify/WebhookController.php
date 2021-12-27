@@ -17,8 +17,9 @@ class WebhookController extends Controller
     {
 
         $this->SendMethod($id);
+        $article = RawArticle::with('category', 'tags', 'website')->where('id', $id)->first();
 
-        $log = Helper::logText("Send Articles");
+        $log = Helper::logText("Send" . $article->website->title . "Articles");
 
         return redirect()->route('sent_articles.index');
     }
