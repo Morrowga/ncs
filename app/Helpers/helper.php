@@ -312,6 +312,9 @@ class Helper
             'lotaya_funny',
             'lotaya_webtoon'
         );
+        $horoscope = ['ရာသီခွင်', 'ရာသီဖွား', 'ဗေဒင်', 'ယတြာ', 'ကံဇာတာ', 'မင်္ဂလာအစီအရင်', 'နေ့နံ', '(၇) ရက်သားသမီး'];
+        $raws = RawArticle::find($id);
+        $title = $raws->title;
 
         $suggest_category = [];
         $raws = RawArticle::find($id);
@@ -335,9 +338,17 @@ class Helper
                 return '7';
             } elseif ($category == "lotaya_webtoon") {
                 return '16';
-            } else {
-                return '1';
             }
+        }
+        if (empty($suggest_category)) {
+            foreach ($horoscope as $horo) {
+                if (strstr($title, $horo)) {
+                    return '1';
+                }
+            }
+        }
+        if (empty($suggest_category)) {
+            return '13';
         }
     }
     public static function indexing_tags($id)
