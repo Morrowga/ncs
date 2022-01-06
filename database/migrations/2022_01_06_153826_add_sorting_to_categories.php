@@ -15,7 +15,7 @@ class AddSortingToCategories extends Migration
     {
         Schema::table('categories', function (Blueprint $table) {
             //
-            $table->integer('sorting')->nullable();
+            $table->integer('sorting')->nullable()->change();
         });
     }
 
