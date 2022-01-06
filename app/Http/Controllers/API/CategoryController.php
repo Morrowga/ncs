@@ -19,7 +19,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $category = Category::get();
+        $category = Category::orderBy('sorting', 'ASC')->get();
         $cat_d = [];
         foreach ($category as $cat) {
             $cat_data = [
