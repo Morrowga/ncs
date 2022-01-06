@@ -28,6 +28,7 @@ class AddSortingToCategories extends Migration
     {
         Schema::table('categories', function (Blueprint $table) {
             //
+            $table->dropColumn('sorting');
         });
     }
 }
