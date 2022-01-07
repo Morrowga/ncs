@@ -95,25 +95,27 @@ class OndoctorCron extends Command
                         $content->save();
                     } else {
                         $on_content = str_replace('p>', '', $on_content);
-                        foreach (explode('strong>', $on_content) as $con) {
-                            foreach (explode('ul>', $con) as $con_ul) {
-                                foreach (explode('li>', $con_ul) as $con_li) {
-                                    $con_li = str_replace('<br>', '', $con_li);
-                                    $con_li = str_replace('<<', '', $con_li);
-                                    $con_li = str_replace('<', '', $con_li);
-                                    $con_li = str_replace('a>', '', $con_li);
-                                    $con_li = str_replace('h4>', '', $con_li);
-                                    $con_li = str_replace('span>', '', $con_li);
-                                    $con_li = str_replace('span style=\'font-weight: 400;\'>', '', $con_li);
-                                    $content = new Content();
-                                    $content->article_id = $article->id;
-                                    $content->content_text = $con_li;
-                                    $content->save();
+                        $on_content = str_replace('strong>', '', $on_content);
+                        $on_content = str_replace('/strong>', '', $on_content);
+                        // foreach (explode('strong>', $on_content) as $con) {
+                        foreach (explode('ul>', $on_content) as $con_ul) {
+                            foreach (explode('li>', $con_ul) as $con_li) {
+                                $con_li = str_replace('<br>', '', $con_li);
+                                $con_li = str_replace('<<', '', $con_li);
+                                $con_li = str_replace('<', '', $con_li);
+                                $con_li = str_replace('a>', '', $con_li);
+                                $con_li = str_replace('h4>', '', $con_li);
+                                $con_li = str_replace('span>', '', $con_li);
+                                $con_li = str_replace('span style=\'font-weight: 400;\'>', '', $con_li);
+                                $content = new Content();
+                                $content->article_id = $article->id;
+                                $content->content_text = $con_li;
+                                $content->save();
 
-                                    $del = Content::where('content_text', "")->delete();
-                                }
+                                $del = Content::where('content_text', "")->delete();
                             }
                         }
+                        // }
                     }
                 }
                 $article_cat = RawArticle::find($article->id);
