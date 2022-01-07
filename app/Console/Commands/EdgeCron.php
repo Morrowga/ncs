@@ -134,6 +134,8 @@ class EdgeCron extends Command
                         }
                     } else {
                         $edge_con = str_replace('tr>', '', $edge_con);
+                        $edge_con = str_replace('strong>', '', $edge_con);
+                        $edge_con = str_replace('/strong>', '', $edge_con);
                         $edge_con = str_replace('ul>', '', $edge_con);
                         $edge_con = str_replace('u>', '', $edge_con);
                         $edge_con = str_replace('li>', '', $edge_con);
@@ -146,7 +148,7 @@ class EdgeCron extends Command
                             $con = str_replace('a', '', $con);
                             $con = str_replace('p', '', $con);
                             $con = str_replace('u', '', $con);
-                            $con = str_replace('strong', '', $con);
+                            // $con = str_replace('strong', '', $con);
                             $con = str_replace('span', '', $con);
                             $con = str_replace('<br />', '', $con);
                             $content = new Content;

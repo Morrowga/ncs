@@ -218,15 +218,15 @@ class MyanmaPlatformCron extends Command
                 $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
                 $article_tag->save();
 
-                 //check duplicate title
-                 if(empty(Helper::duplicate_with_title($store_data->id))){
-                    if(empty(Helper::duplicate_with_content($store_data->id))){
-                        if(empty(Helper::sensitive_keywords($store_data->id))){
-                            if(empty(Helper::checkBlacklist($store_data->id))){
+                //check duplicate title
+                if (empty(Helper::duplicate_with_title($store_data->id))) {
+                    if (empty(Helper::duplicate_with_content($store_data->id))) {
+                        if (empty(Helper::sensitive_keywords($store_data->id))) {
+                            if (empty(Helper::checkBlacklist($store_data->id))) {
                                 //auto send
                                 $auto = new WebhookController();
                                 $auto->SendMethod($store_data->id);
-                                $log = Helper::logText("Ondoctor auto send the data");
+                                $log = Helper::logText("Myanma Platform auto send the data");
                             }
                         }
                     }
