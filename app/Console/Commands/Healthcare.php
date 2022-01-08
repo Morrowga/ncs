@@ -56,8 +56,8 @@ class Healthcare extends Command
             $checkExist = RawArticle::where('source_link', $d['posturl'])->first();
             if (!isset($checkExist->id)) {
                 $store_data = new RawArticle();
-                $store_data->title = $d['title'];
-                $store_data->content = $d['content'];
+                $store_data->title = tounicode($d['title']);
+                $store_data->content = tounicode($d['content']);
                 $store_data->category_id = '8';
                 $store_data->website_id = '35';
                 $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
