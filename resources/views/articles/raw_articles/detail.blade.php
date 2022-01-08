@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="row my-3">
-                    <a href="{{ $raws->source_link}}" style="margin-left:140px;"
+                    <a href="{{ $raws->source_link}}" target="_blank" style="margin-left:140px;"
                         class="btn btn-secondary mt-1 mb-2">ပင်မအကြောင်းအရာ</a>
                 </div>
             </div>
