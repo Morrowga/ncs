@@ -67,62 +67,62 @@ class Healthcare extends Command
                 $store_data->uuid = Helper::uuid();
                 $store_data->save();
 
-                $date_format = date("Y-m-d");
-                $ch = curl_init();
-                $url = 'https://healthcare.com.mm/tompt/' . $date_format;
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_HEADER, 0);
+                // $date_format = date("Y-m-d");
+                // $ch = curl_init();
+                // $url = 'https://healthcare.com.mm/tompt/' . $date_format;
+                // curl_setopt($ch, CURLOPT_URL, $url);
+                // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                // curl_setopt($ch, CURLOPT_HEADER, 0);
 
-                $data = curl_exec($ch);
+                // $data = curl_exec($ch);
 
-                curl_close($ch);
-                $json_d = json_decode($data, true);
+                // curl_close($ch);
+                // $json_d = json_decode($data, true);
 
-                foreach ($json_d['items'] as $d) {
-                    $checkExist = RawArticle::where('source_link', $d['posturl'])->first();
-                    if (!isset($checkExist->id)) {
-                        $d['content'] = str_replace(array("\n", "\r", "\t"), '', $d['content']);
-                        $convert = html_entity_decode($d['content']);
-                        $store_data = new RawArticle();
-                        $store_data->title = tounicode($d['title']);
-                        $store_data->content = $convert;
-                        $store_data->category_id = '8';
-                        $store_data->website_id = '35';
-                        $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
-                        $store_data->image = $d['image'];
-                        $store_data->source_link = $d['posturl'];
-                        $store_data->host = "healthcare.com.mm";
-                        $store_data->save();
+                // foreach ($json_d['items'] as $d) {
+                //     $checkExist = RawArticle::where('source_link', $d['posturl'])->first();
+                //     if (!isset($checkExist->id)) {
+                //         $d['content'] = str_replace(array("\n", "\r", "\t"), '', $d['content']);
+                //         $convert = html_entity_decode($d['content']);
+                //         $store_data = new RawArticle();
+                //         $store_data->title = tounicode($d['title']);
+                //         $store_data->content = $convert;
+                //         $store_data->category_id = '8';
+                //         $store_data->website_id = '35';
+                //         $store_data->publishedDate = date('Y-m-d H:i:s', strtotime($d['date']));
+                //         $store_data->image = $d['image'];
+                //         $store_data->source_link = $d['posturl'];
+                //         $store_data->host = "healthcare.com.mm";
+                //         $store_data->save();
 
-                        foreach (explode('</', $store_data->content) as $hc_content) {
-                            if (stripos($hc_content, 'src')) {
-                                $on_content = str_replace('<p>', '', $hc_content);
-                                $dom = new DOMDocument();
-                                libxml_use_internal_errors(true);
-                                $dom->loadHTML($on_content);
-                                libxml_clear_errors();
-                                $images = $dom->getElementsByTagName('img');
-                                foreach ($images as $image) {
-                                    $img = $image->getAttribute('src');
-                                }
-                                $content = new Content();
-                                $content->article_id = $store_data->id;
-                                $content->content_image = utf8_decode(urldecode($img));
-                                $content->save();
-                            } else {
-                                $on_content = str_replace('p>', '', $hc_content);
-                                $hc_content = str_replace('<<', '', $hc_content);
-                                $hc_content = str_replace('<', '', $hc_content);
-                                $content = new Content();
-                                $content->article_id = $store_data->id;
-                                $content->content_text = html_entity_decode($hc_content);
-                                $content->save();
-
-                                $del = Content::where('content_text', "")->delete();
-                            }
+                foreach (explode('</', $store_data->content) as $hc_content) {
+                    if (stripos($hc_content, 'src')) {
+                        $on_content = str_replace('<p>', '', $hc_content);
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($on_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
                         }
+                        $content = new Content();
+                        $content->article_id = $store_data->id;
+                        $content->content_image = utf8_decode(urldecode($img));
+                        $content->save();
+                    } else {
+                        $on_content = str_replace('p>', '', $hc_content);
+                        $hc_content = str_replace('<<', '', $hc_content);
+                        $hc_content = str_replace('<', '', $hc_content);
+                        $content = new Content();
+                        $content->article_id = $store_data->id;
+                        $content->content_text = html_entity_decode($hc_content);
+                        $content->save();
+
+                        $del = Content::where('content_text', "")->delete();
                     }
+                    // }
+                    // }
                 }
                 // $noti_url = 'https://fcm.googleapis.com/fcm/send';
                 // $noti_data = [
@@ -153,6 +153,11 @@ class Healthcare extends Command
                 // $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
                 // curl_close($curl);
+                $article_cat = RawArticle::find($store_data->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
             }
         }
 
