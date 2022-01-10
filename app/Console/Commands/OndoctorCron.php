@@ -71,7 +71,8 @@ class OndoctorCron extends Command
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
-                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = str_replace(array("\n", "\r", "\t", "<strong", '</strong'), '', $article->content);
+
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $on_content) {
                     if (stripos($on_content, 'src')) {
@@ -106,6 +107,8 @@ class OndoctorCron extends Command
                                 $con_li = str_replace('a>', '', $con_li);
                                 $con_li = str_replace('h4>', '', $con_li);
                                 $con_li = str_replace('span>', '', $con_li);
+                                $ocon_li = str_replace('strong>', '', $con_li);
+                                $con_li = str_replace('/strong>', '', $con_li);
                                 $con_li = str_replace('span style=\'font-weight: 400;\'>', '', $con_li);
                                 $content = new Content();
                                 $content->article_id = $article->id;
