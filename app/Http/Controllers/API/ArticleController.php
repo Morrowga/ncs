@@ -55,7 +55,8 @@ class ArticleController extends Controller
                             $remove_p = str_replace('</strong>', '', $remove_p);
 
                             array_push($get_data_array, $remove_p);
-                        } elseif (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
+                        }
+                        if (stripos($remove_p, '<a') !== false) { // =========================== find a, take href and remove a
                             $dom = new DOMDocument;
                             @$dom->loadHTML($remove_p);
                             $link_counts = $dom->getElementsByTagName('a');

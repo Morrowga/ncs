@@ -94,7 +94,7 @@ class MyanmaPlatformCron extends Command
 
                 $current_id = $store_data->id;
 
-                $store_data->content = str_replace(array("\n", "\r", "\t"), '', $store_data->content);
+                $store_data->content = str_replace(array("\n", "\r", "\t", "<strong>", '</strong>'), '', $store_data->content);
                 $store_data->content = str_replace("<!DOCTYPE html", '', $store_data->content);
                 $store_data->content = str_replace("html", '', $store_data->content);
                 $store_data->content = preg_replace('#<head(.*?)>(.*?)</head>#is', '', $store_data->content);
@@ -195,21 +195,21 @@ class MyanmaPlatformCron extends Command
                         $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
                         $f_content = str_replace('b>', '', $f_content);
                         $convert = html_entity_decode($f_content);
-                        foreach (explode('strong>', $convert) as $con) {
-                            foreach (explode('ul>', $con) as $con_ul) {
-                                foreach (explode('li>', $con_ul) as $con_li) {
-                                    foreach (explode('br>', $con_li) as $br) {
-                                        $con_li = str_replace('<p><', '', $br);
-                                        $con_li = str_replace('ul>', '', $br);
-                                        $content = new Content();
-                                        $content->article_id = $current_id;
-                                        $content->content_text = $br;
-                                        $content->save();
-                                        $del = Content::where('content_text', "")->delete();
-                                    }
+                        // foreach (explode('strong>', $convert) as $con) {
+                        foreach (explode('ul>', $convert) as $con_ul) {
+                            foreach (explode('li>', $con_ul) as $con_li) {
+                                foreach (explode('br>', $con_li) as $br) {
+                                    $con_li = str_replace('<p><', '', $br);
+                                    $con_li = str_replace('ul>', '', $br);
+                                    $content = new Content();
+                                    $content->article_id = $current_id;
+                                    $content->content_text = $br;
+                                    $content->save();
+                                    $del = Content::where('content_text', "")->delete();
                                 }
                             }
                         }
+                        // }
                     }
                 }
                 $article_cat = RawArticle::find($store_data->id);

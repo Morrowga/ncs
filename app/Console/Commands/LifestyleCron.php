@@ -59,7 +59,7 @@ class LifestyleCron extends Command
         curl_close($ch);
         $e = json_encode($data);
         $d = json_decode($e, true);
-        $d = str_replace(array("\n", "\r", "\t"), '', $d);
+        $d = str_replace(array("\n", "\r", "\t", "<strong>", '</strong>'), '', $d);
 
         $rss = new DOMDocument();
         $rss->loadXML($d);
@@ -124,20 +124,20 @@ class LifestyleCron extends Command
                         $convert = str_replace('figcaption>', '', $convert);
                         $convert = str_replace('p>', '', $convert);
                         foreach (explode('h1>', $convert) as $con) {
-                            foreach (explode('strong>', $con) as $con_strong) {
-                                foreach (explode('em>', $con_strong) as $con_em) {
-                                    foreach (explode('ul>', $con_em) as $con_ul) {
-                                        foreach (explode('li>', $con_ul) as $con_li) {
-                                            $content = new Content();
-                                            $content->article_id = $current_id;
-                                            $content->content_text = tounicode($con_li);
-                                            $content->save();
+                            // foreach (explode('strong>', $con) as $con_strong) {
+                            foreach (explode('em>', $con) as $con_em) {
+                                foreach (explode('ul>', $con_em) as $con_ul) {
+                                    foreach (explode('li>', $con_ul) as $con_li) {
+                                        $content = new Content();
+                                        $content->article_id = $current_id;
+                                        $content->content_text = tounicode($con_li);
+                                        $content->save();
 
-                                            $del = Content::where('content_text', "")->delete();
-                                        }
+                                        $del = Content::where('content_text', "")->delete();
                                     }
                                 }
                             }
+                            // }
                         }
                     }
                 }

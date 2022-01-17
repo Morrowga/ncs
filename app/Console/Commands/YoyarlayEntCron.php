@@ -68,7 +68,7 @@ class YoyarlayEntCron extends Command
                 $content_feature->content_image = $filename;
                 $content_feature->save();
 
-                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $yyl_content) {
                     if (stripos($yyl_content, 'href') !== false) {
@@ -107,32 +107,33 @@ class YoyarlayEntCron extends Command
                         $yyl_content = str_replace('p>', '', $yyl_content);
                         $yyl_content = str_replace('a>', '', $yyl_content);
                         $yyl_content = str_replace('strong>', '', $yyl_content);
+                        $yyl_content = str_replace('/strong>', '', $yyl_content);
                         $yyl_content = str_replace('em>', '', $yyl_content);
                         $yyl_content = str_replace('figure>', '', $yyl_content);
                         $yyl_content = str_replace('<', '', $yyl_content);
                         $convert = html_entity_decode($yyl_content);
-                        foreach (explode('</strong>', $convert) as $con) {
-                            $con = str_replace('<strong>', '', $con);
-                            foreach (explode('>', $con) as $con_h2) {
-                                $con_h2 = str_replace('h2', '', $con_h2);
-                                $con_h2 = preg_replace('/\sid=[\'|"][^\'"]+[\'|"]/', '', $con_h2);
-                                $content = new Content();
-                                $content->article_id = $article->id;
-                                $content->content_text = $con_h2;
-                                $content->save();
+                        // foreach (explode('</strong>', $convert) as $con) {
+                        // $con = str_replace('<strong>', '', $convert);
+                        foreach (explode('>', $convert) as $con_h2) {
+                            $con_h2 = str_replace('h2', '', $con_h2);
+                            $con_h2 = preg_replace('/\sid=[\'|"][^\'"]+[\'|"]/', '', $con_h2);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_text = $con_h2;
+                            $content->save();
 
-                                $del = Content::where('content_text', "")->delete();
+                            $del = Content::where('content_text', "")->delete();
 
-                                $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label',];
-                                $result = DB::table('contents')
-                                    ->where(function ($query) use ($array) {
-                                        foreach ($array as $key) {
-                                            $query->orWhere('content_text', 'LIKE', "%$key%");
-                                        }
-                                    })
-                                    ->delete();
-                            }
+                            $array = ['div', 'Post Views:', 'span', 'post-views-count', 'br', 'dashicons-chart-bar', 'entry-meta', 'post-views-label',];
+                            $result = DB::table('contents')
+                                ->where(function ($query) use ($array) {
+                                    foreach ($array as $key) {
+                                        $query->orWhere('content_text', 'LIKE', "%$key%");
+                                    }
+                                })
+                                ->delete();
                         }
+                        // }
                     }
                 }
                 $article_cat = RawArticle::find($article->id);

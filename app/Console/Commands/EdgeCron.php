@@ -68,11 +68,11 @@ class EdgeCron extends Command
                 $store_data = new RawArticle();
                 $store_data->title = tounicode($edge_data['title']);
                 if ($detail_count > $introtext_count) {
-                    $edge_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['detail']);
+                    $edge_data['detail'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $edge_data['detail']);
                     $convert = html_entity_decode($edge_data['detail']);
                     $store_data->content = $convert;
                 } else {
-                    $edge_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $edge_data['introtext']);
+                    $edge_data['introtext'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $edge_data['introtext']);
                     $convert = html_entity_decode($edge_data['introtext']);
                     $store_data->content = $convert;
                 }

@@ -70,11 +70,11 @@ class SayarCron extends Command
                 $store_data = new RawArticle();
                 $store_data->title = tounicode($sayar_data['title']);
                 if ($detail_count > $introtext_count) {
-                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['detail']);
+                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $sayar_data['detail']);
                     $convert = html_entity_decode($sayar_data['detail']);
                     $store_data->content = tounicode($convert);
                 } else {
-                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $sayar_data['introtext']);
+                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $sayar_data['introtext']);
                     $convert = html_entity_decode($sayar_data['introtext']);
                     $store_data->content = tounicode($convert);
                 }
@@ -139,6 +139,7 @@ class SayarCron extends Command
                             $con = strip_tags(str_replace("&nbsp;", " ", $con));
                             $con = str_replace('p>', '', $con);
                             $con = str_replace('strong>', '', $con);
+                            $con = str_replace('/strong>', '', $con);
                             $con = str_replace('<br />', '', $con);
                             $con = str_replace('a>', '', $con);
                             $con = str_replace('tr>', '', $con);

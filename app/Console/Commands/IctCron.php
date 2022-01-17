@@ -70,11 +70,11 @@ class IctCron extends Command
                 $store_data = new RawArticle();
                 $store_data->title = tounicode($ict_data['title']);
                 if ($detail_count > $introtext_count) {
-                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t"), '', $ict_data['detail']);
+                    $ict_data['detail'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $ict_data['detail']);
                     $convert = html_entity_decode($ict_data['detail']);
                     $store_data->content = $convert;
                 } else {
-                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t"), '', $ict_data['introtext']);
+                    $ict_data['introtext'] = str_replace(array("\n", "\r", "\t", "<strong>", "</strong>"), '', $ict_data['introtext']);
                     $convert = html_entity_decode($ict_data['introtext']);
                     $store_data->content = $convert;
                 }
@@ -158,6 +158,7 @@ class IctCron extends Command
                             $con = str_replace('p>', '', $con);
                             $con = str_replace('em>', '', $con);
                             $con = str_replace('strong>', '', $con);
+                            $con = str_replace('/strong>', '', $con);
                             $con = str_replace('iframe>', '', $con);
                             foreach (explode('<br />', $con) as $con_br) {
                                 $content = new Content;
