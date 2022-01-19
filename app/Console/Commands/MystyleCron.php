@@ -62,7 +62,6 @@ class MystyleCron extends Command
         curl_close($ch);
         $e = json_encode($data);
         $d = json_decode($e, true);
-        $d = str_replace(array("\n", "\r", "\t", "<strong>", '</strong>'), '', $d);
 
         $rss = new DOMDocument();
         $rss->loadXML($d);
@@ -92,7 +91,6 @@ class MystyleCron extends Command
                 $raw->website_id = $f['website_id'];
                 // $raw->category_id = $f['category_id'];
                 $raw->host = "mystylemyanmar.com";
-                $raw->uuid = Helper::uuid();
                 $raw->save();
 
                 $current_id = $raw->id;
@@ -117,35 +115,29 @@ class MystyleCron extends Command
                         $f_content = str_replace('<br>', '', $f_content);
                         $f_content = str_replace('<br/>', '', $f_content);
                         $f_content = str_replace('br />', '', $f_content);
-                        $f_content = str_replace('br>', '', $f_content);
-                        $f_content = str_replace('ol>', '', $f_content);
                         $f_content = str_replace('/>', '', $f_content);
                         $f_content = str_replace('<', '', $f_content);
                         $f_content = str_replace('a>', '', $f_content);
                         $f_content = str_replace('p>', '', $f_content);
-                        $f_content = str_replace('video>', '', $f_content);
                         $f_content = str_replace('iframe>', '', $f_content);
-                        $f_content = str_replace('em>', '', $f_content);
                         $f_content = str_replace('div>', '', $f_content);
-                        $f_content = str_replace('br>', '', $f_content);
-                        $f_content = str_replace('!--[if lt IE 9]>script>document.createElement(\'video\');', '', $f_content);
                         $f_content = str_replace(array("\n", "\r", "\t"), '', $f_content);
                         $f_content = str_replace('b>', '', $f_content);
                         $convert = html_entity_decode($f_content);
-                        // foreach (explode('strong>', $convert) as $con) {
-                        foreach (explode('ul>', $convert) as $con_ul) {
-                            foreach (explode('li>', $con_ul) as $con_li) {
-                                foreach (explode('br>', $con_li) as $br) {
-                                    $con_li = str_replace('<p><', '', $br);
-                                    $content = new Content();
-                                    $content->article_id = $current_id;
-                                    $content->content_text = $br;
-                                    $content->save();
-                                    $del = Content::where('content_text', "")->delete();
+                        foreach (explode('strong>', $convert) as $con) {
+                            foreach (explode('ul>', $con) as $con_ul) {
+                                foreach (explode('li>', $con_ul) as $con_li) {
+                                    foreach (explode('br>', $con_li) as $br) {
+                                        $con_li = str_replace('<p><', '', $br);
+                                        $content = new Content();
+                                        $content->article_id = $current_id;
+                                        $content->content_text = $br;
+                                        $content->save();
+                                        $del = Content::where('content_text', "")->delete();
+                                    }
                                 }
                             }
                         }
-                        // }
                     }
                 }
                 $article_cat = RawArticle::find($raw->id);
