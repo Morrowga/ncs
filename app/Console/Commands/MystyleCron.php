@@ -65,7 +65,7 @@ class MystyleCron extends Command
         $d = str_replace(array("\n", "\r", "\t", "<strong>", '</strong>'), '', $d);
 
         $rss = new DOMDocument();
-        $rss->loadXML($d);
+        @$rss->loadXML($d);
         $feed = array();
         foreach ($rss->getElementsByTagName('item') as $node) {
             $item = array(
