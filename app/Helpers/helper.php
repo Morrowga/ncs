@@ -105,7 +105,13 @@ class Helper
             foreach ($suggest_tags as $tags) {
                 if (strstr($authors, $tags)) {
                     $author = $authors;
-                    $author_id = $tags->id;
+                }
+            }
+        }
+        if (!empty($author)) {
+            foreach ($sample_tags as $key => $value) {
+                if (strstr($author, $value)) {
+                    $author_id = $key;
                 }
             }
         }
