@@ -100,14 +100,16 @@ class Helper
             }
         }
         $author = [];
+        $author_id = null;
         foreach ($author_array as $authors) {
             foreach ($suggest_tags as $tags) {
                 if (strstr($authors, $tags)) {
                     $author = $authors;
+                    $author_id = $tags->id;
                 }
             }
         }
-        dd($suggest_tags, $author);
+        dd($suggest_tags, $author, $author_id);
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
