@@ -109,11 +109,10 @@ class Helper
             }
         }
         if (!empty($author)) {
-            foreach ($sample_tags as $key => $value) {
-                dd($key, $value);
-
-                if (strstr($author, $value)) {
-                    $author_id = $key;
+            foreach ($sample_tags as $tags) {
+                if (strstr($author, $tags->nameMm)) {
+                    $author_id = $tags->id;
+                    dd($tags, $author_id, $tags->nameMm);
                 }
             }
         }
