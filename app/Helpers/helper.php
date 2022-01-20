@@ -129,8 +129,8 @@ class Helper
                 }
             }
         }
-        dd(array_slice($result_key, 0, 5));
-        // return (array_slice($result_key, 0, 5));
+        // dd(array_slice($result_key, 0, 5));
+        return (array_slice($result_key, 0, 5));
     }
     //suggesting category from tags
     public static function suggest_category($id)
