@@ -99,6 +99,7 @@ class Helper
                 }
             }
         }
+        //author
         $author = [];
         $author_id = null;
         foreach ($author_array as $authors) {
@@ -112,11 +113,10 @@ class Helper
             foreach ($sample_tags as $tags) {
                 if (strstr($author, $tags->nameMm)) {
                     $author_id = $tags->id;
-                    dd($tags, $author_id, $tags->nameMm);
                 }
             }
         }
-        dd($suggest_tags, $author, $author_id);
+        //author end
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
@@ -135,9 +135,11 @@ class Helper
             foreach ($result_tags as $r_tag) {
                 if (strstr($r_tag, $tag->nameMm)) {
                     $result_key[] = $tag->id;
+                    $result_key[] = $author_id;
                 }
             }
         }
+        dd($result_key);
         // dd(array_slice($result_key, 0, 5));
         return (array_slice($result_key, 0, 5));
     }
