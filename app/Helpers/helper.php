@@ -98,7 +98,7 @@ class Helper
                 }
             }
         }
-        dd($suggest_tags);
+        // dd($suggest_tags);
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
@@ -120,7 +120,8 @@ class Helper
                 }
             }
         }
-        return (array_slice($result_key, 0, 5));
+        dd(array_slice($result_key, 0, 5));
+        // return (array_slice($result_key, 0, 5));
     }
     //suggesting category from tags
     public static function suggest_category($id)
