@@ -98,7 +98,7 @@ class Helper
                 }
             }
         }
-        // dd($suggest_tags);
+        dd($suggest_tags);
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
