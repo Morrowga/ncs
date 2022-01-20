@@ -135,10 +135,10 @@ class Helper
             foreach ($result_tags as $r_tag) {
                 if (strstr($r_tag, $tag->nameMm)) {
                     $result_key[] = $tag->id;
-                    $result_key[] = $author_id;
                 }
             }
         }
+        $result_key[] = $author_id;
         dd($result_key);
         // dd(array_slice($result_key, 0, 5));
         return (array_slice($result_key, 0, 5));
