@@ -107,7 +107,7 @@ class Helper
                 }
             }
         }
-        // dd($suggest_tags, $author);
+        dd($suggest_tags, $author);
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
