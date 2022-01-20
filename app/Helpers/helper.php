@@ -131,6 +131,9 @@ class Helper
         }
         // return $result_tags;
         $result_key = [];
+        if ($author_id) {
+            $result_key[] = $author_id;
+        }
         foreach ($sample_tags as $tag) {
             foreach ($result_tags as $r_tag) {
                 if (strstr($r_tag, $tag->nameMm)) {
@@ -138,9 +141,8 @@ class Helper
                 }
             }
         }
-        $result_key[] = $author_id;
-        dd($result_key);
-        // dd(array_slice($result_key, 0, 5));
+        // dd($result_key);
+        dd(array_slice($result_key, 0, 5));
         return (array_slice($result_key, 0, 5));
     }
     //suggesting category from tags
