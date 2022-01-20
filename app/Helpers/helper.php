@@ -110,6 +110,8 @@ class Helper
         }
         if (!empty($author)) {
             foreach ($sample_tags as $key => $value) {
+                dd($key, $value);
+
                 if (strstr($author, $value)) {
                     $author_id = $key;
                 }
