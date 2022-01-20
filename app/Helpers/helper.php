@@ -86,6 +86,7 @@ class Helper
     public static function suggest_tags($id)
     {
         $sample_tags = Tag::get();
+        $author_array = ['ပီပီ(မန္တလေး)', 'သော်တာလမင်းစန္ဒာ', 'ကိုချမ်း', 'ခြူသစ်မောင်']; //add author array
         $suggest_tags = [];
         $result_tags = [];
         $raws = RawArticle::find($id);
@@ -98,7 +99,15 @@ class Helper
                 }
             }
         }
-        // dd($suggest_tags);
+        $author = [];
+        foreach ($author_array as $authors) {
+            foreach ($suggest_tags as $tags) {
+                if (strstr($authors, $tags)) {
+                    $author = $authors;
+                }
+            }
+        }
+        dd($suggest_tags, $author);
         $count_tags = array_count_values($suggest_tags);
         arsort($count_tags); //sorting with value
         // dd($count_tags);
