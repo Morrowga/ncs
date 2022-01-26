@@ -86,7 +86,8 @@ class Helper
     public static function suggest_tags($id)
     {
         $sample_tags = Tag::get();
-        $author_array = ['ပီပီ(မန္တလေး)', 'သော်တာလမင်းစန္ဒာ', 'ကိုချမ်း', 'ခြူသစ်မောင်']; //add author array
+        #LTY_(author name)
+        $author_array = ['LTY_(ပီပီ(မန္တလေး))', 'LTY_(သော်တာလမင်းစန္ဒာ)', 'LTY_(ကိုချမ်း)', 'LTY_(ခြူသစ်မောင်)']; //add author array
         $suggest_tags = [];
         $result_tags = [];
         $raws = RawArticle::find($id);
