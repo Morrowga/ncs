@@ -132,7 +132,7 @@ class YatharCron extends Command
                         }
                     } else {
                         $search_array = array(
-                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong', '>', 'ul', 'li', 'pre class=\"wp-block-preformatted\"'
+                            '/>', '<', 'a>', 'p>', '&8211;', 'figure', 'strong', '>', 'ul', 'li', 'pre class="wp-block-preformatted"'
                         );
                         $f_con = str_replace($search_array, '', $f_content);
                         $f_content = trim(html_entity_decode($f_con), " \t\n\r\0\x0B\xC2\xA0");
