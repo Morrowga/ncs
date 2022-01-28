@@ -87,6 +87,7 @@ class Helper
     {
         $sample_tags = Tag::get();
         #LTY_(author name)
+        //lotaya
         $author_array = ['LTY_(ပီပီ(မန္တလေး))', 'LTY_(သော်တာလမင်းစန္ဒာ)', 'LTY_(ကိုချမ်း)', 'LTY_(ခြူသစ်မောင်)']; //add author array
         $suggest_tags = [];
         $result_tags = [];
