@@ -75,3 +75,4 @@ Route::get('/farmer_media', 'Web_Scraping\LinksController@farmer_media');
 Route::get('/automobile', 'Web_Scraping\LinksController@automobile');
 Route::get('/ballonestar', 'Web_Scraping\LinksController@ballonestar');
 Route::get('/myanma_platform', 'Web_Scraping\LinksController@myanma_platform');
+Route::get('/myanmarload', 'Web_Scraping\LinksController@myanmarload');

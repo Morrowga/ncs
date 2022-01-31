@@ -2217,4 +2217,63 @@ class LinksController extends Controller
             }
         }
     }
+    public function myanmarload()
+    {
+        $link = Link::find(10);
+        $scraper = new Scraper(new Client());
+
+        $scraper->handle($link);
+
+        $articles = RawArticle::where('website_id', '51')->get();
+        foreach ($articles as $article) {
+            $check_exist = Content::where('article_id', $article->id)->get();
+            if ($check_exist->count() < 1) {
+                $content_feature = new Content;
+                $content_feature->content_image = $article->image;
+                $content_feature->save();
+
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = trim(str_replace('"', "'", $article->content));
+                foreach (explode('</', $article->content) as $moda_beauty_content) {
+                    if (stripos($moda_beauty_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($moda_beauty_content);
+                        libxml_clear_errors();
+                        $images = $dom->getElementsByTagName('img');
+                        foreach ($images as $image) {
+                            $img = $image->getAttribute('src');
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_image = $img;
+                            $content->save();
+                        }
+                    } else {
+                        $moda_beauty_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('strong', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('br', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('span', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('<', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('iframe', '', $moda_beauty_content);
+                        $convert = html_entity_decode($moda_beauty_content);
+                        foreach (explode('>', $convert) as $con) {
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_text = $con;
+                            $content->save();
+
+                            $del = Content::where('content_text', "")->delete();
+                        }
+                    }
+                }
+                $article_cat = RawArticle::find($article->id);
+                // dd($article_cat);
+                $article_tag = RawArticle::find($article_cat->id);
+                $article_tag->tags()->sync((array)Helper::suggest_tags($article_tag->id));
+                $article_tag->save();
+            }
+        }
+    }
 }
