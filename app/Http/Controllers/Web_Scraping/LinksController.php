@@ -2251,12 +2251,18 @@ class LinksController extends Controller
                     } else {
                         $moda_beauty_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $moda_beauty_content);
                         $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('noscript>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('i>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('figcaption>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('figure>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('div>', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('strong', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('br', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('span', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('<', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('iframe', '', $moda_beauty_content);
+
                         $convert = html_entity_decode($moda_beauty_content);
                         foreach (explode('>', $convert) as $con) {
                             $content = new Content();
