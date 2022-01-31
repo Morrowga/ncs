@@ -2234,11 +2234,26 @@ class LinksController extends Controller
 
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
-                foreach (explode('</', $article->content) as $moda_beauty_content) {
-                    if (stripos($moda_beauty_content, 'src')) {
+                foreach (explode('</', $article->content) as $mm_load_content) {
+
+                    if (stripos($mm_load_content, 'href') !== false) {
                         $dom = new DOMDocument();
                         libxml_use_internal_errors(true);
-                        $dom->loadHTML($moda_beauty_content);
+                        $dom->loadHTML($mm_load_content);
+                        libxml_clear_errors();
+                        $links = $dom->getElementsByTagName('a');
+                        foreach ($links as $link) {
+                            $a_link = $link->getAttribute('href');
+                            $a_text = utf8_decode($link->textContent);
+                            $content = new Content();
+                            $content->article_id = $article->id;
+                            $content->content_link = $a_text . "^" . $a_link;
+                            $content->save();
+                        }
+                    } elseif (stripos($mm_load_content, 'src')) {
+                        $dom = new DOMDocument();
+                        libxml_use_internal_errors(true);
+                        $dom->loadHTML($mm_load_content);
                         libxml_clear_errors();
                         $images = $dom->getElementsByTagName('img');
                         foreach ($images as $image) {
@@ -2252,23 +2267,23 @@ class LinksController extends Controller
                             $content->save();
                         }
                     } else {
-                        $moda_beauty_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('noscript>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('i>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('figcaption>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('figure>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('div>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('b>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('a>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('strong', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('br', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('span', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('<', '', $moda_beauty_content);
-                        $moda_beauty_content = str_replace('iframe', '', $moda_beauty_content);
+                        $mm_load_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $mm_load_content);
+                        $mm_load_content = str_replace('p>', '', $mm_load_content);
+                        $mm_load_content = str_replace('noscript>', '', $mm_load_content);
+                        $mm_load_content = str_replace('i>', '', $mm_load_content);
+                        $mm_load_content = str_replace('figcaption>', '', $mm_load_content);
+                        $mm_load_content = str_replace('figure>', '', $mm_load_content);
+                        $mm_load_content = str_replace('div>', '', $mm_load_content);
+                        $mm_load_content = str_replace('b>', '', $mm_load_content);
+                        $mm_load_content = str_replace('a>', '', $mm_load_content);
+                        $mm_load_content = str_replace('strong', '', $mm_load_content);
+                        $mm_load_content = str_replace('br', '', $mm_load_content);
+                        $mm_load_content = str_replace('p>', '', $mm_load_content);
+                        $mm_load_content = str_replace('span', '', $mm_load_content);
+                        $mm_load_content = str_replace('<', '', $mm_load_content);
+                        $mm_load_content = str_replace('iframe', '', $mm_load_content);
 
-                        $convert = html_entity_decode($moda_beauty_content);
+                        $convert = html_entity_decode($mm_load_content);
                         foreach (explode('>', $convert) as $con) {
                             $content = new Content();
                             $content->article_id = $article->id;
