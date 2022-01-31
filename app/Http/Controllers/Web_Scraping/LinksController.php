@@ -2246,6 +2246,9 @@ class LinksController extends Controller
                             $content = new Content();
                             $content->article_id = $article->id;
                             $content->content_image = $img;
+                            if (strstr($content->content_image, "data:image")) {
+                                $content->content_image = "";
+                            }
                             $content->save();
                         }
                     } else {
@@ -2256,6 +2259,8 @@ class LinksController extends Controller
                         $moda_beauty_content = str_replace('figcaption>', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('figure>', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('div>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('b>', '', $moda_beauty_content);
+                        $moda_beauty_content = str_replace('a>', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('strong', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('br', '', $moda_beauty_content);
                         $moda_beauty_content = str_replace('p>', '', $moda_beauty_content);
