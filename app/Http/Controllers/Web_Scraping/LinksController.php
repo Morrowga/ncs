@@ -2228,13 +2228,18 @@ class LinksController extends Controller
         foreach ($articles as $article) {
             $check_exist = Content::where('article_id', $article->id)->get();
             if ($check_exist->count() < 1) {
-                $content_feature = new Content;
-                $content_feature->content_image = $article->image;
-                $content_feature->save();
+                // $content_feature = new Content;
+                // $content_feature->content_image = $article->image;
+                // $content_feature->save();
+                $article->image = null;
 
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
                 $article->content = preg_replace('#<h1 class="grid-article-title">(.*?)</h1>#', '', $article->content);
                 $article->content = preg_replace('#<div class="grid-article-summary">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<span class="article-summary-datetime">(.*?)</span>#', '', $article->content);
+                $article->content = preg_replace('#<span class="article-summary-datetime">(.*?)</span>#', '', $article->content);
+                $article->content = preg_replace('#<p class="article-summary-title-sub">(.*?)</p>#', '', $article->content);
+
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $mm_load_content) {
 
@@ -2267,6 +2272,14 @@ class LinksController extends Controller
                                 $content->content_image = "";
                             }
                             $content->save();
+                            if (empty($article->image)) {
+                                if (strstr($content->content_image, "http")) {
+                                    $article->image = $content->content_image;
+                                    $article->save();
+                                    $content->content_image = "";
+                                    $content->save();
+                                }
+                            }
                         }
                     } else {
                         $mm_load_content = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si", '<$1$2>', $mm_load_content);
