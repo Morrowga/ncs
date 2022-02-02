@@ -2233,6 +2233,8 @@ class LinksController extends Controller
                 $content_feature->save();
 
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = preg_replace('#<h1 class="grid-article-title">(.*?)</h1>#', '', $article->content);
+                $article->content = preg_replace('#<div class="grid-article-summary">(.*?)</div>#', '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
                 foreach (explode('</', $article->content) as $mm_load_content) {
 
