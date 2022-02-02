@@ -147,8 +147,14 @@ class ArticleController extends Controller
                     array_push($content_array, $content_data_text);
                 }
                 if ($content['content_image'] != null) {
+                    $mm_load = RawArticle::where('id', $content->article_id)->where('host', '=', 'mmload.com')->first();
                     $hots = RawArticle::where('id', $content->article_id)->where('host', '=', 'yoyarlay.com')->first();
-                    if ($hots) {
+                    if ($mm_load) {
+                        $content_data_image = [
+                            "key" => "image",
+                            "value" => "https://www.mmload.com" . $content['content_image']
+                        ];
+                    } elseif ($hots) {
                         $content_data_image = [
                             "key" => "image",
                             "value" => "http://139.59.110.228/storage/" . $content['content_image']
