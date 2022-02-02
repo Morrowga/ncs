@@ -12,6 +12,7 @@ use App\Console\Commands\MystyleCron;
 use App\Console\Commands\LifestyleCron;
 use App\Console\Commands\ModaCron;
 use App\Console\Commands\MyanmaPlatformCron;
+use App\Console\Commands\MyanmarLoadCron;
 use App\Console\Commands\OndoctorCron;
 use App\Console\Commands\SayarCron;
 use App\Console\Commands\WeddingguideCron;
@@ -45,7 +46,8 @@ class Kernel extends ConsoleKernel
         BuilderguideCron::class,
         FarmerCron::class,
         MyanmaPlatformCron::class,
-        BalloneStarCron::class
+        BalloneStarCron::class,
+        MyanmarLoadCron::class
     ];
 
     /**
@@ -73,6 +75,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('farmer:cron')->cron('*/10 * * * *');
         $schedule->command('platform:cron')->cron('*/30 * * * *');
         $schedule->command('ballonestar:cron')->cron('*/10 * * * *');
+        $schedule->command('myanmarload:cron')->cron('*/10 * * * *');
         $schedule->command('mystyle_title:cron')->cron('*/10 * * * *');
     }
 
