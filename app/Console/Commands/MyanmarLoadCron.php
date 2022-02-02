@@ -57,6 +57,12 @@ class MyanmarLoadCron extends Command
                 // $content_feature->content_image = $article->image;
                 // $content_feature->save();
                 $article->image = null;
+                $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
+                $article->content = preg_replace('#<h1 class="grid-article-title">(.*?)</h1>#', '', $article->content);
+                $article->content = preg_replace('#<div class="grid-article-summary">(.*?)</div>#', '', $article->content);
+                $article->content = preg_replace('#<span class="article-summary-datetime">(.*?)</span>#', '', $article->content);
+                $article->content = preg_replace('#<span class="article-summary-datetime">(.*?)</span>#', '', $article->content);
+                $article->content = preg_replace('#<p class="article-summary-title-sub">(.*?)</p>#', '', $article->content);
 
                 $article->content = str_replace(array("\n", "\r", "\t"), '', $article->content);
                 $article->content = trim(str_replace('"', "'", $article->content));
