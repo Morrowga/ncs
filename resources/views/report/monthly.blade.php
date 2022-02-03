@@ -25,8 +25,10 @@
 
                             <th width="9%" class="text-center">Original Category</th>
                             <th width="8%" class="text-center">Lotaya Category</th>
-                            <th width="4%" class="text-center">Reject</th>
-                            <th width="5%" class="text-center">Reject Reason</th>
+                            {{-- <th width="4%" class="text-center">Reject</th>
+                            <th width="5%" class="text-center">Reject Reason</th> --}}
+                            <th width="9%" class="text-center">Excel Category</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -39,8 +41,16 @@
                             <td>{{ $sent->publishedDate}}</td>
                             <td>{{ $sent->website->providerCategory}}</td>
                             <td>{{ $sent->category->name }}</td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                <form class="form-inline">
+                                    <div class="form-group mx-sm-3 mb-2">
+                                      <label for="excel_pro_category" class="sr-only">Provider Category</label>
+                                      <input type="text" class="form-control" id="excel_pro_category" placeholder="{{$sent->excel_pro_category}}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mb-2">Create</button>
+                                </form>
+                            </td>
+                            {{-- <td></td> --}}
                         </tr>
                         @empty
                         <tr>
