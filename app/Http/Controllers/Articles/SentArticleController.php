@@ -186,7 +186,10 @@ class SentArticleController extends Controller
     {
         $excel_category = $request->input('excel_pro_category');
         $id = $request->input('id');
-        // $raw_articles = RawArticle::where('id',$)
-        dd($excel_category, $id);
+        RawArticle::where('id', $id)->update(array(
+            'excel_pro_category' => $excel_category,
+        ));
+        return view('report.monthly');
+        // dd($excel_category, $id);
     }
 }
