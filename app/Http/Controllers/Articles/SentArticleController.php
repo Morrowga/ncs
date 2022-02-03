@@ -189,7 +189,7 @@ class SentArticleController extends Controller
         RawArticle::where('id', $id)->update(array(
             'excel_pro_category' => $excel_category,
         ));
-        return redirect()->route('report.monthly');
+        return redirect()->route('monthly');
         // dd($excel_category, $id);
     }
 }
