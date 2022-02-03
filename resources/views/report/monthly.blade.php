@@ -42,7 +42,7 @@
                             <td>{{ $sent->website->providerCategory}}</td>
                             <td>{{ $sent->category->name }}</td>
                             <td>
-                                <form action="/excel_category" class="form-inline">
+                                <form action="/excel_category" class="form-inline" method="POST">
                                     @csrf
                                     <div class="form-group mx-sm-3 mb-2">
                                       <label for="excel_pro_category" class="sr-only">Provider Category</label>
