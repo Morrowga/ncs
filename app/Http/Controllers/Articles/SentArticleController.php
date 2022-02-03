@@ -185,6 +185,8 @@ class SentArticleController extends Controller
     public function excel_category(Request $request)
     {
         $excel_category = $request->input('excel_pro_category');
-        dd($excel_category);
+        $id = $request->input('id');
+        // $raw_articles = RawArticle::where('id',$)
+        dd($excel_category, $id);
     }
 }

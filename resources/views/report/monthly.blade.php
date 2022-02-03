@@ -46,6 +46,7 @@
                                     @csrf
                                     <div class="form-group mx-sm-3 mb-2">
                                       <label for="excel_pro_category" class="sr-only">Provider Category</label>
+                                      <input type="hidden" class="form-control" name="id" value="{{ $sent->id}}">
                                       <input type="text" class="form-control" name="excel_pro_category" placeholder="{{$sent->excel_pro_category}}">
                                     </div>
                                     <button type="submit" class="btn btn-primary mb-2">Create</button>
