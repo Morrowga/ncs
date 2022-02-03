@@ -12,7 +12,7 @@ class RawArticle extends Model
     // use SoftDeletes;
     protected $table = "raw_articles";
 
-    protected $fillable = ['title', 'content', 'image', 'host', 'publisedDate', 'fontType', 'sent_status', 'update_status', 'uuid', 'thumbnailUrl'];
+    protected $fillable = ['title', 'content', 'image', 'host', 'publisedDate', 'fontType', 'sent_status', 'update_status', 'uuid', 'thumbnailUrl', 'excel_pro_category'];
 
     protected $convertable = ['title', 'content'];
 

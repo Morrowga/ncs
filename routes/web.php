@@ -52,6 +52,7 @@ Route::put('raw_articles/duplicate/{id}', 'Articles\RawArticleController@duplica
 Route::put('raw_articels/blacklist/{id}', 'Articles\RawArticleController@blacklist')->name('raw_articles.blacklist');
 Route::get('activities', 'Articles\RawArticleController@activityLog')->name('activity');
 Route::get('mystyle_title', 'MystyleTitleController@index')->name('mystyle_title');
+Route::post('excel_category', 'Articles\SentArticleController@excel_category')->name('excel_category');
 
 
 // get data and crawl data

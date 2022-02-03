@@ -42,7 +42,8 @@
                             <td>{{ $sent->website->providerCategory}}</td>
                             <td>{{ $sent->category->name }}</td>
                             <td>
-                                <form class="form-inline">
+                                <form action="/excel_category" class="form-inline">
+                                    @csrf
                                     <div class="form-group mx-sm-3 mb-2">
                                       <label for="excel_pro_category" class="sr-only">Provider Category</label>
                                       <input type="text" class="form-control" id="excel_pro_category" placeholder="{{$sent->excel_pro_category}}">

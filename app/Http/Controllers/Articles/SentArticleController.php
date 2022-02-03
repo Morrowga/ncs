@@ -181,4 +181,10 @@ class SentArticleController extends Controller
     {
         return Excel::download(new SentArticlesExport, 'invoices.xlsx');
     }
+    //excel category
+    public function excel_category(Request $request)
+    {
+        $excel_category = $request->input('excel_pro_category');
+        dd($excel_category);
+    }
 }
